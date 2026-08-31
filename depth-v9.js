@@ -1,0 +1,31 @@
+'use strict';
+/* v9 DEEP WORLD — durability economy + procedural bestiary/arsenal/event ecology. */
+(function(){
+const D={version:9,weaponHits:0,weaponMax:0,weaponKey:'',eventT:18,events:0,variantCount:0};window.DEEP_V9=D;
+const prefixes=['Tiny','Mossy','Blushing','Moonlit','Drowsy','Thorny','Gilded','Frosted','Ember','Crystal','Storm','Dusky','Astral','Ancient','Wild','Royal','Hollow','Petal','Prism','Starry'];
+const suffixes=['Sprout','Puff','Imp','Mite','Hopper','Nibble','Sprite','Crawler','Wisp','Beast','Guardian','Stalker','Knight','Howler','Drake','Golem','Spirit','Fiend'];
+const weaponPrefix=['Petal','Moon','Honey','Cloud','Rose','Bamboo','Spirit','Prism','Thunder','Frost','Ember','Dragon','Royal','Astral','Void','World'];
+const weaponNouns=['Sword','Axe','Mace','Spear','Bow','Daggers','Chakram','Hammer','Wand','Glaive','Cannon','Blade','Maul','Scythe','Bell','Staff'];
+const events=['Slime Migration','Fairy Lantern Night','Meteor Shower','Goblin Picnic Ambush','Moon Moth Bloom','Royal Hunt','Crystal Storm','Lost Caravan','Spirit Procession','Treasure Rain','Wisp Swarm','Ancient Bell Toll','Falling Stars','Mushroom Uprising','Dragon Shadow','Frost Stampede','Ember Eruption','Ghost Parade','Bloom Festival','Void Breach','Golden Hour','Thunder Herd','Relic Rush','Star Beast Hunt'];
+function durabilityFor(w){return Math.round((26+w.rarity*13)*(w.cd>.65?1.3:w.cd<.3?.82:1));}
+function syncWeapon(force=false){const key=weapon.name+'|'+weapon.rarity;if(force||D.weaponKey!==key){D.weaponKey=key;D.weaponMax=durabilityFor(weapon);D.weaponHits=D.weaponMax;}}
+syncWeapon(true);
+const baseEquip=equipMaybe;equipMaybe=function(next){const before=weapon;baseEquip(next);if(weapon!==before)syncWeapon(true)};
+const baseFire=fireAttack;fireAttack=function(target){if(!target)return;if(D.weaponHits<=0){breakWeapon();return}baseFire(target);D.weaponHits--;if(D.weaponHits===10||D.weaponHits===5)toast('⚠ '+weapon.name+' · '+D.weaponHits+' hits left');if(D.weaponHits<=0)setTimeout(breakWeapon,70)};
+function breakWeapon(){if(D.weaponHits>0)return;const old=weapon;toast('💥 '+old.name+' BROKE · find another weapon!');sound('hurt');puff(player.x,player.y,rarityColor[old.rarity],20,180);weapon=weapons[0];D.weaponKey='';syncWeapon(true);D.weaponHits=Math.min(D.weaponHits,14);hud()}
+/* Hundreds of deterministic enemy identities are layered over combat archetypes, preserving readable AI. */
+function variantName(q){if(q.deepName)return q.deepName;const s=Math.abs((q.seed*99991)|0),a=prefixes[s%prefixes.length],b=suffixes[(s*7+(mobDefs[q.type].tier||0)*3)%suffixes.length];q.deepName=a+' '+b;q.deepVariant=s%12;D.variantCount++;return q.deepName}
+const baseSpawn=spawnMob;spawnMob=function(type,elite=false){const before=mobs.length,ret=baseSpawn(type,elite);for(let i=before;i<mobs.length;i++){const q=mobs[i];variantName(q);const v=q.deepVariant||0,tier=mobDefs[q.type].tier||0;q.max*=1+(v%4)*.045;q.hp=q.max;q.deepDamage=1+(v%5)*.055+tier*.025;q.deepSpeed=1+((v%3)-1)*.045}return ret};
+/* Make enemies meaningfully threatening: faster engagement, harder contact, less idle retreat. */
+const baseHurt=hurt;hurt=function(amount,from){let mult=1.16+dangerAt(player.x,player.y)*.055;if(from&&from.deepDamage)mult*=from.deepDamage;baseHurt(amount*mult,from)};
+const baseAi=aiMove;aiMove=function(q,def,dt,dx,dy,d){const old=def.spd;def.spd=old*(q.deepSpeed||1)*(1.08+dangerAt(q.x,q.y)*.018);baseAi(q,def,dt,dx,dy,d);def.spd=old};
+/* Expand arsenal to 276 named/stat-distinct weapons from coherent weapon families. */
+const kinds={Sword:['melee','sword',72,.40,28],Axe:['melee','axe',66,.54,40],Mace:['melee','mace',68,.55,50],Spear:['melee','spear',108,.49,35],Bow:['ranged','bow',340,.50,20],Daggers:['melee','daggers',60,.25,17],Chakram:['ranged','chakram',275,.44,27],Hammer:['melee','hammer',82,.70,78],Wand:['ranged','wand',315,.46,24],Glaive:['melee','glaive',118,.47,48],Cannon:['ranged','cannon',290,.65,62],Blade:['melee','blade',90,.31,40],Maul:['melee','hammer',86,.76,92],Scythe:['melee','scythe',128,.42,68],Bell:['ranged','bell',335,.39,50],Staff:['ranged','staff',380,.42,38]};
+const existing=new Set(weapons.map(w=>w.name));for(let p=0;p<weaponPrefix.length;p++)for(let n=0;n<weaponNouns.length;n++){const name=weaponPrefix[p]+' '+weaponNouns[n];if(existing.has(name))continue;const k=kinds[weaponNouns[n]],rar=Math.min(5,Math.floor((p/weaponPrefix.length)*6)+(n%11===0?1:0)),power=.95+rar*.62+(n%5)*.08+(p%4)*.045;weapons.push({name,rarity:rar,power:+power.toFixed(2),range:k[2]+(p%3)*8,cd:Math.max(.2,k[3]-(rar*.012)),kb:k[4]+rar*4,type:k[0],kind:k[1]})}
+/* Frequent world incidents create runs with different stories instead of only different terrain. */
+function eventBurst(){if(!started||dead)return;D.events++;const tier=dangerAt(player.x,player.y),name=events[(Math.random()*events.length)|0];toast('✦ WORLD EVENT · '+name);sound('discover');if(/Treasure|Relic|Caravan/.test(name)){for(let i=0;i<2+tier;i++)drops.push({x:player.x+(Math.random()-.5)*240,y:player.y+(Math.random()-.5)*240,type:'weapon',weapon:rollWeapon(1+tier*.35),t:42,bob:i})}else if(/Golden|Festival|Lantern/.test(name)){hp=Math.min(maxHp,hp+10+tier*2);for(let i=0;i<18;i++)puff(player.x+(Math.random()-.5)*250,player.y+(Math.random()-.5)*180,'#fff0a6',4,70)}else{for(let i=0;i<3+tier*2;i++)spawnMob(null,tier>=3&&Math.random()<.18)}D.eventT=24+Math.random()*34}
+const oldUpdate=update;update=function(dt){oldUpdate(dt);D.eventT-=dt;if(D.eventT<=0)eventBurst()};
+/* Durability display is always visible, especially critical on rare weapons. */
+const oldHud=hud;hud=function(){oldHud();const el=document.getElementById('wp');if(el)el.textContent=rarity[weapon.rarity]+' · '+weapon.name+' · '+D.weaponHits+'/'+D.weaponMax+' hits'};
+window.__TWBB_DEEP_TEST__={get:()=>({version:9,weapons:weapons.length,eventTypes:events.length,enemyIdentities:prefixes.length*suffixes.length,durability:D.weaponHits+'/'+D.weaponMax})};
+})();

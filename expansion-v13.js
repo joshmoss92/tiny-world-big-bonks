@@ -1,0 +1,81 @@
+'use strict';
+/* v13 — persistent auto-run path steering + true epic biome creatures. */
+(function(){
+const X={version:13,heading:0,autoRun:true,epicT:18,epicsSeen:0,lastEpic:'',avoidAngle:0};window.EXPANSION_V13=X;
+
+/* ---------- AUTO-RUN WITH LOCAL OBSTACLE AVOIDANCE ---------- */
+function clearStep(a,dist=30){const x=player.x+Math.cos(a)*dist,y=player.y+Math.sin(a)*dist;return !blockedCircle(x,y,PLAYER_R+1)}
+function bestHeading(base){
+  const probes=[0,.22,-.22,.42,-.42,.68,-.68,.95,-.95,1.25,-1.25,1.55,-1.55];
+  for(const off of probes){const a=base+off;if(clearStep(a,34)&&clearStep(a,18))return a}
+  return base;
+}
+const basePlayer=updatePlayer;
+updatePlayer=function(dt){
+  if(window.REBUILD_V12&&REBUILD_V12.choice)return;
+  if(window.COMBAT&&COMBAT.dashT>0)return basePlayer(dt);
+  let requested=X.heading;
+  /* Keyboard remains useful: pressing a key updates the persistent heading. */
+  let kx=0,ky=0;if(keys.KeyW||keys.ArrowUp)ky-=1;if(keys.KeyS||keys.ArrowDown)ky+=1;if(keys.KeyA||keys.ArrowLeft)kx-=1;if(keys.KeyD||keys.ArrowRight)kx+=1;
+  if(kx||ky){requested=Math.atan2(ky,kx);X.heading=requested}
+  const a=bestHeading(requested);X.avoidAngle=a;player.vx=Math.cos(a);player.vy=Math.sin(a);player.dir=a;
+  const speed=164*(player.v12Speed||1);
+  moveBody(player,player.vx*speed*dt,player.vy*speed*dt,PLAYER_R);
+};
+X.setHeading=function(a){X.heading=a;player.dir=a;player.vx=Math.cos(a);player.vy=Math.sin(a)};
+
+/* ---------- TRUE EPIC CREATURE TIER ---------- */
+const epicByBiome=[
+ ['verdantDragon','sunGriffin','cloverTitan'],
+ ['sakuraDragon','petalKirin','blossomPhoenix'],
+ ['moonDragon','lunarSphinx','silverPegasus'],
+ ['bogHydra','mireLeviathan','lotusNaga'],
+ ['emberDragon','magmaHydra','ashPhoenix'],
+ ['frostDragon','iceKirin','rimeMammoth'],
+ ['prismDragon','crystalGriffin','gemColossus'],
+ ['lotusDragon','gardenLeviathan','vineChimera'],
+ ['voidDragon','nightManticore','graveCerberus'],
+ ['astralDragon','starLeviathan','cosmicHydra']
+];
+const epicSpecs={
+ verdantDragon:['Verdant Dragon','treant','dragon',240,48,20],sunGriffin:['Sun Griffin','moth','griffin',185,72,18],cloverTitan:['Clover Titan','golem','titan',310,29,23],
+ sakuraDragon:['Sakura Dragon','pink','dragon',255,52,21],petalKirin:['Petal Kirin','frostStag','kirin',205,78,19],blossomPhoenix:['Blossom Phoenix','emberling','phoenix',190,74,18],
+ moonDragon:['Moon Dragon','starbeast','dragon',285,56,23],lunarSphinx:['Lunar Sphinx','wraithQueen','sphinx',235,48,22],silverPegasus:['Silver Pegasus','frostStag','griffin',210,82,20],
+ bogHydra:['Bog Hydra','serpent','hydra',330,37,25],mireLeviathan:['Mire Leviathan','worldEater','leviathan',390,31,27],lotusNaga:['Lotus Naga','serpent','naga',245,59,22],
+ emberDragon:['Ember Dragon','emberling','dragon',365,58,28],magmaHydra:['Magma Hydra','magmaToad','hydra',430,34,30],ashPhoenix:['Ash Phoenix','moth','phoenix',260,82,24],
+ frostDragon:['Frost Dragon','frostling','dragon',390,60,29],iceKirin:['Ice Kirin','frostStag','kirin',300,86,25],rimeMammoth:['Rime Mammoth','golem','titan',480,27,32],
+ prismDragon:['Prism Dragon','crystalbeetle','dragon',420,58,31],crystalGriffin:['Crystal Griffin','moth','griffin',315,80,26],gemColossus:['Gem Colossus','golem','titan',520,25,34],
+ lotusDragon:['Lotus Dragon','treant','dragon',430,55,31],gardenLeviathan:['Garden Leviathan','worldEater','leviathan',510,32,34],vineChimera:['Vine Chimera','riftHound','chimera',335,70,28],
+ voidDragon:['Void Dragon','voidling','dragon',490,68,35],nightManticore:['Night Manticore','riftHound','manticore',390,79,32],graveCerberus:['Grave Cerberus','riftHound','cerberus',445,75,34],
+ astralDragon:['Astral Dragon','starbeast','dragon',620,72,40],starLeviathan:['Star Leviathan','worldEater','leviathan',760,36,44],cosmicHydra:['Cosmic Hydra','voidling','hydra',690,48,42]
+};
+Object.entries(epicSpecs).forEach(([key,s],idx)=>{const biome=Math.floor(idx/3);mobDefs[key]={hp:s[3],spd:s[4],dmg:s[5],xp:18+biome*4,r:27+(idx%3)*2,ai:'boss',tier:Math.max(1,Math.floor(biome/2)),v13Epic:true,v13Name:s[0],v13Kind:s[2],v13Biome:biome,spriteBase:s[1]}});
+
+function epicShot(q,count,speed,mult,spread=.24){if(!window.AI_DIRECTOR)return;const def=mobDefs[q.type],base=Math.atan2(player.y-q.y,player.x-q.x);for(let i=0;i<count;i++){const a=base+(i-(count-1)/2)*spread;AI_DIRECTOR.enemyShots.push({x:q.x,y:q.y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,t:3,dmg:def.dmg*mult,kind:q.type,r:6})}}
+const prevAi=aiMove;
+aiMove=function(q,def,dt,dx,dy,d){if(!def.v13Epic)return prevAi(q,def,dt,dx,dy,d);q.v13Cd=Math.max(0,(q.v13Cd||.5)-dt);q.v13Phase=(q.v13Phase||0)+dt;const nx=dx/d,ny=dy/d,kind=def.v13Kind,rr=def.r*.7,move=(x,y,s)=>moveBody(q,x*s*dt,y*s*dt,rr);
+ if(kind==='dragon'){if(d>150)move(nx,ny,def.spd*.75);else move(-ny, nx,def.spd*.7);if(q.v13Cd<=0){q.v13Cd=1.35;q.telegraph=.42;epicShot(q,5,225,0.55,.17)}}
+ else if(kind==='hydra'){if(d>125)move(nx,ny,def.spd*.52);if(q.v13Cd<=0){q.v13Cd=1.55;q.telegraph=.5;epicShot(q,7,185,.48,.22)}}
+ else if(kind==='phoenix'){move(nx*.18-ny,ny*.18+nx,def.spd*.9);if(q.v13Cd<=0){q.v13Cd=1.15;epicShot(q,3,255,.62,.15)}}
+ else if(kind==='griffin'||kind==='kirin'){if(q.v13Cd<=0&&d<260){q.v13Cd=1.45;q.v13Dash=.32;q.v13Aim=Math.atan2(dy,dx);q.telegraph=.38}if(q.v13Dash>0){q.v13Dash-=dt;move(Math.cos(q.v13Aim),Math.sin(q.v13Aim),def.spd*2.55)}else move(-ny*.55+nx*.35,nx*.55+ny*.35,def.spd)}
+ else if(kind==='leviathan'||kind==='titan'){if(d>100)move(nx,ny,def.spd*.6);if(q.v13Cd<=0){q.v13Cd=1.9;q.telegraph=.58;epicShot(q,9,155,.44,.32)}}
+ else if(kind==='manticore'||kind==='chimera'||kind==='cerberus'||kind==='naga'){move(nx-ny*.5,ny+nx*.5,def.spd*.95);if(q.v13Cd<=0&&d<260){q.v13Cd=1.3;epicShot(q,3,220,.58,.2)}}
+ else if(kind==='sphinx'){if(d<170)move(-nx,-ny,def.spd*.65);else move(-ny,nx,def.spd*.5);if(q.v13Cd<=0){q.v13Cd=1.6;epicShot(q,5,240,.52,.2)}}
+};
+
+function spawnEpic(b=biomeAtWorld(player.x,player.y),forced=false){const list=epicByBiome[b],type=list[(Math.random()*list.length)|0];if(mobs.some(q=>mobDefs[q.type]?.v13Epic))return null;const q=spawnMob(type,true);if(q){q.v13Cd=.6;q.epic=true;X.epicsSeen++;X.lastEpic=mobDefs[type].v13Name;toast('✦ EPIC CREATURE · '+mobDefs[type].v13Name+' has appeared');sound('boss');}return q}
+X.spawnEpic=spawnEpic;
+
+const oldUpdate=update;
+update=function(dt){oldUpdate(dt);if(!started||dead)return;X.epicT-=dt;const tier=dangerAt(player.x,player.y);if(X.epicT<=0){const chance=.18+tier*.1;if(Math.random()<chance)spawnEpic();X.epicT=26+Math.random()*30-Math.min(10,tier*2)}};
+
+/* Epic kills guarantee meaningful loot and relic progress. */
+const prevKill=killMob;
+killMob=function(q){const def=mobDefs[q.type],epic=!!def?.v13Epic;prevKill(q);if(epic){relics+=2+Math.floor(def.v13Biome/3);drops.push({x:q.x+18,y:q.y+18,type:'weapon',weapon:rollWeapon(3.2+def.v13Biome*.25),t:65,bob:2});toast('♛ '+def.v13Name+' defeated · epic cache recovered');sound('mythic')}};
+
+/* Draw epic identity on top of whichever established sprite family represents it. */
+const oldDraw=drawMobSprite;
+drawMobSprite=function(q,t,cx,cy){const def=mobDefs[q.type];if(!def?.v13Epic)return oldDraw(q,t,cx,cy);const original=q.type;q.type=def.spriteBase;oldDraw(q,t,cx,cy);q.type=original;const sx=q.x-player.x+cx,sy=q.y-player.y+cy;ctx.save();ctx.textAlign='center';ctx.font='900 10px ui-rounded,system-ui';ctx.fillStyle='#fff6cf';ctx.strokeStyle='#5f426f';ctx.lineWidth=3;ctx.strokeText('✦ '+def.v13Name+' ✦',sx,sy-def.r-34);ctx.fillText('✦ '+def.v13Name+' ✦',sx,sy-def.r-34);ctx.strokeStyle=rarityColor[5];ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx,sy,def.r+11+Math.sin(t*4)*2,0,Math.PI*2);ctx.stroke();ctx.restore()};
+
+window.__TWBB_V13_TEST__={get:()=>({version:13,autoRun:X.autoRun,heading:X.heading,epicTypes:Object.keys(epicSpecs).length,epicsSeen:X.epicsSeen,lastEpic:X.lastEpic})};
+})();

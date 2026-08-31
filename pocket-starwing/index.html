@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1022" />
   <title>Pocket Starwing</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -15,9 +16,10 @@
       </div>
       <div class="hud" aria-live="polite">
         <span>Score <b id="score">0</b></span>
-        <span>Hull <b id="hull">♥♥♥♥♥</b></span>
-        <span>Level <b id="level">1</b></span>
+        <span>Hull <b id="hull">♥♥♥♥♥♥</b></span>
+        <span>Sector <b id="level">1</b></span>
         <span>Weapon <b id="weapon">Pulse I</b></span>
+        <span>Energy <b id="energy">100%</b></span>
       </div>
     </header>
 
@@ -26,7 +28,11 @@
       <div id="overlay" class="overlay">
         <div class="panel">
           <h2 id="overlayTitle">Pocket Starwing</h2>
-          <p id="overlayText">Blast raiders, dodge plasma, skim canyon walls and defeat the guardian at the end of each sector.</p>
+          <p id="overlayText">Blast raiders, dodge plasma, thread terrain gaps, destroy breakable hazards and defeat the guardian at the end of each sector.</p>
+          <div class="tips">
+            <span>Near-miss bullets to recharge dodge energy</span>
+            <span>Fly cleanly through gates for bonus score</span>
+          </div>
           <div id="routeChoice" class="route-choice hidden"></div>
           <button id="startBtn">Start Mission</button>
         </div>
@@ -36,14 +42,15 @@
     <section class="controls">
       <div>
         <h3>Keyboard</h3>
-        <p>Move: WASD / arrows · Fire: Space · Bomb: X · Pause: P</p>
+        <p>Move: WASD / arrows · Fire: Space · Dodge: Shift/C · Bomb: X · Pause: P</p>
       </div>
       <div class="touch-pad" aria-label="Touch controls">
-        <button data-move="up">▲</button>
-        <button data-move="left">◀</button>
+        <button data-move="up" aria-label="Move up">▲</button>
+        <button data-move="left" aria-label="Move left">◀</button>
         <button id="fireBtn" class="accent">FIRE</button>
-        <button data-move="right">▶</button>
-        <button data-move="down">▼</button>
+        <button data-move="right" aria-label="Move right">▶</button>
+        <button id="dodgeBtn" class="dodge">DODGE</button>
+        <button data-move="down" aria-label="Move down">▼</button>
         <button id="bombBtn">BOMB</button>
       </div>
     </section>
@@ -54,6 +61,7 @@
       <span>🛡 Shield</span>
       <span>💣 Bomb</span>
       <span>⭐ Score burst</span>
+      <span>✦ Graze = energy</span>
     </section>
   </main>
   <script src="game.js"></script>

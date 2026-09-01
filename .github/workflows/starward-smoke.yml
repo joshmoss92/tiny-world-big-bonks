@@ -24,14 +24,13 @@ jobs:
           node --check pocket-starwing/v10-polish6.js
           node --check pocket-starwing/v10-polish7.js
           node --check pocket-starwing/v10-polish8.js
+          node --check pocket-starwing/v10-polish9.js
           node --check pocket-starwing/smoke-test.cjs
           node --check pocket-starwing/smoke-v105.cjs
           node --check pocket-starwing/smoke-v106.cjs
           node --check pocket-starwing/smoke-v107.cjs
           node --check pocket-starwing/smoke-v110.cjs
-          node --check pocket-starwing/inspect-v110.cjs
-      - name: Inspect generated V10.10 results path
-        run: node pocket-starwing/inspect-v110.cjs
+          node --check pocket-starwing/smoke-v111.cjs
 
   stress:
     needs: syntax
@@ -65,3 +64,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-v110.cjs
+      - name: Simulate V10.11 mastery polish seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v111.cjs

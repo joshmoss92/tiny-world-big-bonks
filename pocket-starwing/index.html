@@ -23,27 +23,35 @@
       </div>
     </header>
 
-    <section class="game-wrap">
-      <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game. Hold the ship and drag it to move."></canvas>
-      <div id="overlay" class="overlay">
-        <div class="panel">
-          <h2 id="overlayTitle">Pocket Starwing</h2>
-          <p id="overlayText">Hold the ship and drag it exactly where you want to fly. Blast enemies, thread terrain gaps and discover new weapons as the sectors get stranger.</p>
-          <div class="tips">
-            <span>Hold + drag the ship to move</span>
-            <span>Near-miss bullets to recharge dodge</span>
-            <span>Weapon drops can switch or upgrade your gun</span>
-          </div>
-          <div id="routeChoice" class="route-choice hidden"></div>
-          <button id="startBtn">Start Mission</button>
-        </div>
+    <section class="play-stage">
+      <div id="verticalControl" class="vertical-control" role="application" aria-label="Vertical ship control. Drag up and down to move the ship.">
+        <span class="rail-arrow">▲</span>
+        <span class="rail-label">SLIDE</span>
+        <span class="rail-arrow">▼</span>
       </div>
+
+      <section class="game-wrap">
+        <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game. Use the control rail on the left to move up and down."></canvas>
+        <div id="overlay" class="overlay">
+          <div class="panel">
+            <h2 id="overlayTitle">Pocket Starwing</h2>
+            <p id="overlayText">Use the control strip on the left: hold your thumb anywhere on it and slide up or down to change altitude. The ship stays in a fixed forward lane.</p>
+            <div class="tips">
+              <span>Left rail = up/down only</span>
+              <span>Near-miss bullets to recharge dodge</span>
+              <span>Weapon drops can switch or upgrade your gun</span>
+            </div>
+            <div id="routeChoice" class="route-choice hidden"></div>
+            <button id="startBtn">Start Mission</button>
+          </div>
+        </div>
+      </section>
     </section>
 
     <section class="controls">
       <div class="drag-help">
         <h3>Movement</h3>
-        <p><strong>Touch / mouse:</strong> press directly on the ship, hold it, then drag. Keyboard movement remains available with WASD / arrows.</p>
+        <p><strong>Touch / mouse:</strong> use the vertical rail beside the game and slide up or down. There is no forward/back movement. Keyboard: W/S or Up/Down.</p>
       </div>
       <div class="action-pad" aria-label="Action controls">
         <button id="fireBtn" class="accent">HOLD FIRE</button>

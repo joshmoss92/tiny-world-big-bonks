@@ -1,46 +1,59 @@
 # Starward Run
 
-Starward Run is an autopilot survival roguelite designed around long stretches of watchable combat interrupted by a small number of meaningful decisions.
+Starward Run is an autopilot survival roguelite: the ship flies, aims and dodges automatically while the player shapes the build, focuses priority targets, fires the Star Laser and chooses whether to accept live risks.
 
-## Core loop
+## Core interaction
 
-1. Configure a five-choice starting build.
-2. The ship flies, aims, shoots and dodges automatically.
-3. Tap an enemy to focus fire on it for five seconds.
-4. Kills charge the Star Laser; once charged and off its 30-second lock, tap the ship to erase normal enemies and enemy projectiles.
-5. Optional live events appear for five seconds without pausing combat. Tap empty space to accept them or ignore them.
-6. Long runs progress through sectors, bosses, route decisions and Deep Space modifiers.
+- Five pre-flight choices, ending with an explicit run-defining doctrine.
+- Automatic movement, aiming, firing and dodging.
+- Tap the ship to fire the Star Laser when charged and its 30-second lock has expired.
+- Tap an enemy or a destructible boss system to focus the arsenal for 7 seconds and gain a damage bonus.
+- Timed live events continue combat while the player gets five seconds to opt in.
 
-## Build system
+## V9 production systems
 
-Upgrades use plain-language categories: Weapon, Offense, Defense, Autopilot, Command, Utility, Special and Doctrine. Cards show a before/after preview where possible. Synergy thresholds visibly evolve the ship and its weapons, including Fortress Build, Ace Autopilot, Full Auto, Missile Storm, Beam Lance and Detonation Grid.
+### Weapon evolution
+Every weapon can reach a dramatic late-run form: Pulse Overdrive, Galaxy Spread, Cluster Apocalypse, Rail Lance, Flak Cascade, Arc Web, Drone Fleet, Beam Array and Nova Core. Upgrade cards show progress toward the next evolution, and the ship changes visually as its arsenal grows.
 
-## Bosses
+### Boss encounters
+Bosses enter with a short cinematic beat, expose destructible weapon systems, telegraph major attacks, change behavior between phases and alter the visual arena. Destroying systems weakens attacks and exposes the core for bonus damage.
 
-Bosses have distinct mechanics rather than sharing one bullet pattern:
-- Glimmer Maw summons escorts.
-- Cinder Throne emits radial projectile rings.
-- Archive Crown uses a rechargeable shield that creates damage windows.
-- Storm Seraph telegraphs dangerous sweeping lanes.
-- Violet Oracle teleports and fires radial bursts after it is unlocked.
-- The optional Rift Tyrant combines several mechanics.
+### Elite variants
+Elite enemies can be Shielded, Phase, Berserker, Splitter, Commander, Vampire, Armored or Cloaked. The modifier is visually readable and changes behavior rather than only adding health.
 
-## Live events
+### Mechanically distinct sectors
+Each biome has a rule: Tailwind, Heat Front, Ruin Hunters, Ion Storm, Gravity Tide, Gold Rush or Prismatic Void. Rules change movement, elite frequency, shield regeneration, projectile curvature, build progress and encounter composition.
 
-Examples include voluntary swarms, elite hunters, reactor overdrive, shield gambits, carrier fleets, rescue escorts, treasure runners, asteroid gauntlets, hull sacrifice and voluntary Rift boss fights.
+### Mythic / God effects
+Rare signature upgrades can fundamentally alter combat, including Critical Nova, Star Laser Wake, Prism Mirror, Ghost Fleet and Arsenal Singularity.
 
-## Long-run structure
+### Live stories and rare encounters
+Live challenges are framed as short situations such as a civilian mayday, unstable rift, bounty broadcast, fleet crossing or derelict reactor. Longer runs can encounter an allied carrier, derelict megaship, wormhole or Asteroid Leviathan.
 
-Every sector changes the environment. Starting in Sector 5, Deep Space modifiers add rule changes such as Elite Sector, Bullet Storm, Hyperlane, Shield Blackout and Boss Rush. Rare route decisions also create safer or more aggressive paths.
+### Doctrines
+Unlocked doctrines can radically change a run without creating permanent raw-power progression: Balanced Systems, Fortress Doctrine, Hunter Doctrine, Experimental Arsenal, Swarm Protocol, Boss Hunter, Chaos Draft and Glass Fleet.
 
-## Meta progression
+### Meta progression
+Stellar Cores unlock breadth: weapons, events, biomes, doctrines, signature upgrades, bosses and cosmetic ship skins. The pre-run menu shows collection progress across the arsenal, events, bosses, biomes, doctrines and skins.
 
-Runs earn Stellar Cores. Cores unlock breadth rather than permanent raw stats: new weapon families, event types, doctrines, signature upgrades, biome variants, boss encounters and cosmetic ship skins. Run history and best survival are stored locally.
+### Presentation and performance
+- Player projectiles use a cool-color hierarchy while enemy fire stays warm and warning attacks are brighter.
+- Dynamic nebulae, planets, debris, aurora bands, comets, boss arena effects and rare megastructures.
+- Ship visuals grow missile pods, cannons, armor, shield hardware, drones and evolved weapon effects.
+- Death uses a short reactor-failure sequence before an animated results screen with build-of-the-run, evolutions, boss history, unlocks and Stellar Cores.
+- Adaptive rendering quality, projectile caps and particle limits preserve mobile performance while keeping enemy density high.
 
-## Presentation
+## Validation
 
-The canvas uses layered nebulae, moving planets, parallax stars, debris, aurora bands, comets, animated enemy silhouettes, build-specific ship attachments, boss telegraphs, particles and screen shake. A small Web Audio synthesizer provides weapons, impacts, warnings, boss intensity, upgrade cues and Star Laser effects without requiring external audio files. Reduced-motion preferences are respected.
+`smoke-test.cjs` runs a deterministic multi-minute simulation and verifies:
 
-## Testing
-
-`node --check game.js` validates syntax. `node smoke-test.cjs` exercises the five opening choices, dense combat, focus fire, live events, boss mechanics, Star Laser cooldown enforcement, blocking-choice cadence, results presentation and local meta-progression persistence.
+- five pre-flight choices and doctrine UX
+- dense combat and sparse blocking choices
+- live events and focus fire
+- 30-second Star Laser lock
+- weapon evolution
+- elite affixes
+- rare encounters
+- boss mechanics and destructible weak-point targeting
+- adaptive quality bounds
+- death/results flow and saved meta progression

@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax check
-        run: node --check pocket-starwing/game.js
-      - name: Runtime simulation
+      - name: Loader syntax check
+        run: node --check pocket-starwing/game-v9-loader.js
+      - name: Reconstruct and simulate V9 runtime
         run: node pocket-starwing/smoke-test.cjs

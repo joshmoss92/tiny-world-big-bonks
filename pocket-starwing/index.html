@@ -15,18 +15,18 @@
         <span aria-label="Score">★ <b id="score">0</b></span>
         <span aria-label="Hull"><b id="hull">♥♥♥♥♥♥</b></span>
         <span aria-label="Sector">◆ <b id="level">1</b></span>
-        <span class="weapon-pill" aria-label="Weapon"><b id="weapon">Pulse Cannon ★</b></span>
+        <span class="weapon-pill" aria-label="Weapon"><b id="weapon">Pulse ★</b></span>
         <span aria-label="Energy">⚡ <b id="energy">100%</b></span>
       </div>
     </header>
 
     <section class="play-stage">
-      <div id="verticalControl" class="flight-pad" role="application" aria-label="Flight control. Drag up and down strongly, or left and right slightly.">
-        <span class="pad-up">▲</span>
-        <span class="pad-left">◀</span>
-        <span class="pad-dot">●</span>
-        <span class="pad-right">▶</span>
-        <span class="pad-down">▼</span>
+      <div id="flightPad" class="flight-pad" role="application" aria-label="Flight control pad. Drag in any direction to steer.">
+        <span class="pad-axis pad-up">▲</span>
+        <span class="pad-axis pad-left">◀</span>
+        <span id="padPuck" class="pad-puck" aria-hidden="true"></span>
+        <span class="pad-axis pad-right">▶</span>
+        <span class="pad-axis pad-down">▼</span>
       </div>
 
       <section class="game-wrap">
@@ -42,13 +42,10 @@
       </section>
     </section>
 
-    <section class="action-pad" aria-label="Action controls">
-      <button id="fireBtn" class="fire" aria-label="Fire">●</button>
+    <section class="action-bar" aria-label="Action controls">
       <button id="dodgeBtn" class="dodge" aria-label="Dodge">↯</button>
-      <button id="bombBtn" class="bomb" aria-label="Bomb">✦</button>
     </section>
   </main>
-  <script src="movement-hotfix.js"></script>
   <script src="game.js"></script>
 </body>
 </html>

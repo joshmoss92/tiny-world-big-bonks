@@ -164,6 +164,18 @@ if(typeof drawEnemy==='function'){
   };
 }
 
+function p2AppendResults(){
+  if(!S||typeof overlayText==='undefined')return;
+  const p=p2Ensure();if(p.resultsAdded)return;
+  p.resultsAdded=true;
+  overlayText.innerHTML+='<div class="tactical-results"><strong>TACTICAL COMMAND</strong><span>Priority kills '+(S.aaa.focusKills||0)+'</span><span>Best focus chain '+Math.max(1,p.maxFocusChain+1)+'×</span><span>Capital ships '+(S.aaa.capitalKills||0)+'</span><span>Systems destroyed '+p.systemKills+'</span></div>';
+}
+
+if(typeof showResults==='function'){
+  const __p2ShowResults=showResults;
+  showResults=function(){const r=__p2ShowResults.apply(this,arguments);p2AppendResults();return r;};
+}
+
 const __p2Update=update;
 update=function(dt){
   __p2Update(dt);
@@ -171,10 +183,7 @@ update=function(dt){
   const pressure=S.enemies.length+S.bullets.length*.16+S.shots.length*.08;
   p.peakPressure=Math.max(p.peakPressure,pressure);p.peakBullets=Math.max(p.peakBullets,S.bullets.length);p.peakEnemies=Math.max(p.peakEnemies,S.enemies.length);
   if(S.quality<p.lastQuality-.01)p.qualityDrops++;p.lastQuality=S.quality;
-  if(S.phase==='dead'&&!p.resultsAdded&&typeof overlayText!=='undefined'&&/BUILD OF THE RUN/.test(overlayText.innerHTML||'')){
-    p.resultsAdded=true;
-    overlayText.innerHTML+='<div class="tactical-results"><strong>TACTICAL COMMAND</strong><span>Priority kills '+(S.aaa.focusKills||0)+'</span><span>Best focus chain '+Math.max(1,p.maxFocusChain+1)+'×</span><span>Capital ships '+(S.aaa.capitalKills||0)+'</span><span>Systems destroyed '+p.systemKills+'</span></div>';
-  }
+  if(S.phase==='dead'&&!p.resultsAdded&&typeof overlayText!=='undefined'&&/BUILD OF THE RUN/.test(overlayText.innerHTML||''))p2AppendResults();
 };
 
 if(typeof window!=='undefined'&&window.__STARWARD__){

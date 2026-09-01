@@ -15,7 +15,7 @@
         <span class="brand-glyph">✦</span>
         <div>
           <h1>Starward Run</h1>
-          <p>ONE-FINGER SPACE COMBAT ROGUELITE</p>
+          <p>CINEMATIC ONE-FINGER SPACE ROGUELITE</p>
         </div>
       </div>
       <div class="header-actions"><button id="soundBtn" class="tiny-button" type="button">SOUND ON</button></div>
@@ -28,13 +28,13 @@
     </header>
 
     <section class="game-card">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run. Drag on the battlefield to pilot the ship vertically while aiming every weapon. Flick up or down for a Phase Dash. Graze enemy projectiles to build Gunnery Flow. Hold a steady lock then release for a Lock Burst. Shoot Power Fork and Flight Protocol cores to shape the run. Live events use their ACCEPT button. Fire the Star Laser with the dedicated button below the playfield."></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. Drag on the battlefield to pilot the ship vertically while aiming every weapon. Flick up or down for a Phase Dash. Graze enemy projectiles to build Gunnery Flow. Hold a steady lock then release for a Lock Burst. Shoot Power Fork and Flight Protocol cores to shape the run. Major combat beats use cinematic zoom, slow motion, title cards, shockwaves and debris. Live events use their ACCEPT button. Fire the Star Laser with the dedicated button below the playfield."></canvas>
 
       <div id="overlay" class="overlay">
         <div class="choice-panel">
           <div id="eyebrow" class="eyebrow">PILOT + GUNNER ROGUELITE</div>
-          <h2 id="overlayTitle">Fly it. Aim it. Break the formation.</h2>
-          <p id="overlayText">Choose a starting build, then control the fight with one finger. Drag vertically to pilot while your arsenal follows your aim. Flick through danger with a Phase Dash, skim hostile fire to build Flow, hold a clean lock and release for a burst of damage, and shoot real-time power or protocol choices without stopping the battle.</p>
+          <h2 id="overlayTitle">Fly it. Aim it. Make it spectacular.</h2>
+          <p id="overlayText">Choose a starting build, then control the fight with one finger. Drag vertically to pilot while your arsenal follows your aim. Flick through danger with a Phase Dash, skim hostile fire to build Flow, hold a clean lock and release for a burst of damage, and shoot real-time power or protocol choices without stopping the battle. Boss arrivals, phase changes, capital kills, Star Lasers and high-skill moments now trigger cinematic presentation beats.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
           <div id="metaSummary" class="meta-summary"></div>
           <div class="menu-actions"><button id="startBtn" class="primary-button">Configure Run</button><button id="skinBtn" class="secondary-button" type="button">Ship Skin</button></div>
@@ -47,7 +47,7 @@
         <div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div>
         <div class="meter laser-meter"><i id="laserFill"></i></div>
         <button id="laserButton" class="laser-trigger" type="button">FIRE STAR LASER</button>
-        <small>Dedicated super weapon. Aim and movement stay uninterrupted.</small>
+        <small>Dedicated super weapon with a full cinematic discharge beat.</small>
       </div>
 
       <div class="command-module">
@@ -76,7 +76,7 @@
       <span>Flick = Phase Dash.</span>
       <span>Graze = build Flow.</span>
       <span>Steady lock + release = Lock Burst.</span>
-      <span>Shoot choices = shape the run.</span>
+      <span>Big moments = cinematic presentation.</span>
     </footer>
   </main>
   <script src="v10-transform.js"></script>
@@ -97,6 +97,7 @@
   <script src="v16-power-state.js"></script>
   <script src="v17-flow-choice.js"></script>
   <script src="v18-mechanics.js"></script>
+  <script src="v19-cinematic.js"></script>
   <script src="game-v9-loader.js"></script>
 </body>
 </html>

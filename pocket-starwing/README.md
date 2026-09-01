@@ -3,7 +3,11 @@
 A self-contained original pixel-art browser rail shooter.
 
 ## Primary movement
-Touch and mouse movement is direct manipulation: **press on the ship, hold it, and drag it around the playfield**. The ship follows the held pointer with light smoothing. This is the primary control model on phones/tablets and also works with a mouse. WASD / arrow keys remain as a fallback.
+The ship now uses a **fixed forward lane**. The player does not move forward or backward.
+
+On touch or mouse, use the dedicated vertical control rail on the left side of the game. Hold anywhere on the rail and slide your thumb/finger/mouse up or down; the ship moves vertically by the same relative amount. This keeps the player's hand away from the ship and preserves visibility during dodging.
+
+Keyboard fallback is vertical only: W/S or Up/Down. Left/Right and A/D movement are disabled.
 
 ## Actions
 - Hold FIRE / Space: autofire
@@ -12,7 +16,7 @@ Touch and mouse movement is direct manipulation: **press on the ship, hold it, a
 - Pause: P
 
 ## Weapon families
-Weapon drops now switch or upgrade distinct weapon families. Collecting the same family upgrades it to a maximum of three stars.
+Weapon drops switch or upgrade distinct weapon families. Collecting the same family upgrades it to a maximum of three stars.
 - Pulse Cannon — fast, accurate general-purpose fire
 - Star Scatter — broad spread for swarms and tight movement
 - Prism Beam — rapid piercing shots for lines of enemies
@@ -22,7 +26,7 @@ Weapon drops now switch or upgrade distinct weapon families. Collecting the same
 More weapon families unlock as sectors progress.
 
 ## Enemy roster
-The director can now mix scouts, zig fighters, divers, turrets, tanks, mines, splitters and carriers. Splitters spawn smaller enemies when destroyed; carriers deploy fighters and drop weapons; mines change speed as the player approaches.
+The director can mix scouts, zig fighters, divers, turrets, tanks, mines, splitters and carriers. Splitters spawn smaller enemies when destroyed; carriers deploy fighters and drop weapons; mines change speed as the player approaches.
 
 ## Level progression
 Each biome has recurring set pieces rather than only random hazards:

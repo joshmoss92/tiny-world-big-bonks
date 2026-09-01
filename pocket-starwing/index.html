@@ -10,65 +10,42 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <div>
-        <h1>Pocket Starwing</h1>
-        <p>Original pixel rail-shooter adventure</p>
-      </div>
+      <h1>Pocket Starwing</h1>
       <div class="hud" aria-live="polite">
-        <span>Score <b id="score">0</b></span>
-        <span>Hull <b id="hull">♥♥♥♥♥♥</b></span>
-        <span>Sector <b id="level">1</b></span>
-        <span>Weapon <b id="weapon">Pulse Cannon ★</b></span>
-        <span>Energy <b id="energy">100%</b></span>
+        <span aria-label="Score">★ <b id="score">0</b></span>
+        <span aria-label="Hull"><b id="hull">♥♥♥♥♥♥</b></span>
+        <span aria-label="Sector">◆ <b id="level">1</b></span>
+        <span class="weapon-pill" aria-label="Weapon"><b id="weapon">Pulse Cannon ★</b></span>
+        <span aria-label="Energy">⚡ <b id="energy">100%</b></span>
       </div>
     </header>
 
     <section class="play-stage">
-      <div id="verticalControl" class="vertical-control" role="application" aria-label="Vertical ship control. Drag up and down to move the ship.">
-        <span class="rail-arrow">▲</span>
-        <span class="rail-label">SLIDE</span>
-        <span class="rail-arrow">▼</span>
+      <div id="verticalControl" class="flight-pad" role="application" aria-label="Flight control. Drag up and down strongly, or left and right slightly.">
+        <span class="pad-up">▲</span>
+        <span class="pad-left">◀</span>
+        <span class="pad-dot">●</span>
+        <span class="pad-right">▶</span>
+        <span class="pad-down">▼</span>
       </div>
 
       <section class="game-wrap">
-        <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game. Use the control rail on the left to move up and down."></canvas>
+        <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game"></canvas>
         <div id="overlay" class="overlay">
           <div class="panel">
             <h2 id="overlayTitle">Pocket Starwing</h2>
-            <p id="overlayText">Use the control strip on the left: hold your thumb anywhere on it and slide up or down to change altitude. The ship stays in a fixed forward lane.</p>
-            <div class="tips">
-              <span>Left rail = up/down only</span>
-              <span>Near-miss bullets to recharge dodge</span>
-              <span>Weapon drops can switch or upgrade your gun</span>
-            </div>
+            <p id="overlayText" class="overlay-copy"></p>
             <div id="routeChoice" class="route-choice hidden"></div>
-            <button id="startBtn">Start Mission</button>
+            <button id="startBtn" class="play-button" aria-label="Start mission">▶</button>
           </div>
         </div>
       </section>
     </section>
 
-    <section class="controls">
-      <div class="drag-help">
-        <h3>Movement</h3>
-        <p><strong>Touch / mouse:</strong> use the vertical rail beside the game and slide up or down. There is no forward/back movement. Keyboard: W/S or Up/Down.</p>
-      </div>
-      <div class="action-pad" aria-label="Action controls">
-        <button id="fireBtn" class="accent">HOLD FIRE</button>
-        <button id="dodgeBtn" class="dodge">DODGE</button>
-        <button id="bombBtn">BOMB</button>
-      </div>
-    </section>
-
-    <section class="legend">
-      <span>Pulse = accurate</span>
-      <span>Scatter = wide</span>
-      <span>Beam = piercing</span>
-      <span>Seekers = homing</span>
-      <span>Nova = heavy</span>
-      <span>Repair</span>
-      <span>Shield</span>
-      <span>Bomb</span>
+    <section class="action-pad" aria-label="Action controls">
+      <button id="fireBtn" class="fire" aria-label="Fire">●</button>
+      <button id="dodgeBtn" class="dodge" aria-label="Dodge">↯</button>
+      <button id="bombBtn" class="bomb" aria-label="Bomb">✦</button>
     </section>
   </main>
   <script src="movement-hotfix.js"></script>

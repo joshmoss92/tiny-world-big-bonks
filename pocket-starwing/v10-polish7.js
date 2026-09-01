@@ -8,7 +8,7 @@
   const POLISH7=String.raw`
 
 // ---- Starward Run V10.9 focus-break combat layer ----
-const AAA7_STAGGER={normal:1.55,elite:1.90,capital:2.35,boss:2.55};
+const AAA7_STAGGER={normal:.90,elite:1.15,capital:1.45,boss:1.65};
 
 function aaa7Ensure(){
   aaaEnsureState();

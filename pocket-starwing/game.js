@@ -1,67 +1,1234 @@
 (() => {
 'use strict';
-const $=id=>document.getElementById(id),canvas=$('game'),ctx=canvas.getContext('2d'),overlay=$('overlay'),overlayTitle=$('overlayTitle'),overlayText=$('overlayText'),eyebrow=$('eyebrow'),choiceGrid=$('choiceGrid'),startBtn=$('startBtn');
-const ui={time:$('time'),hull:$('hull'),shield:$('shield'),level:$('level'),salvage:$('salvage'),damage:$('statDamage'),rate:$('statRate'),dodge:$('statDodge'),thrust:$('statThrust'),repair:$('statRepair'),luck:$('statLuck'),xp:$('xpText'),xpBar:$('xpBar'),chips:$('buildChips')};
-const W=canvas.width,H=canvas.height,clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),rand=(a,b)=>a+Math.random()*(b-a),pick=a=>a[(Math.random()*a.length)|0],chance=p=>Math.random()<p;ctx.imageSmoothingEnabled=false;
-const RARITIES=[{name:'Rare',cls:'rare',weight:58,power:1},{name:'Epic',cls:'epic',weight:25,power:1.45},{name:'Legendary',cls:'legendary',weight:10,power:2},{name:'Mythic',cls:'mythic',weight:5,power:3},{name:'God',cls:'god',weight:2,power:4.5}];
-const BIOMES=[{name:'Cloudreach',top:'#081a39',bottom:'#4f9bb4',accent:'#c6ffab',fog:'#88e6ff12'},{name:'Ember Belt',top:'#1b1028',bottom:'#9b413c',accent:'#ffd071',fog:'#ff9b6715'},{name:'Silent Ruins',top:'#070e27',bottom:'#273b5c',accent:'#72f0e3',fog:'#72f0e310'},{name:'Stormglass',top:'#070d18',bottom:'#21394f',accent:'#dceeff',fog:'#c7e6ff12'},{name:'Violet Deep',top:'#160b28',bottom:'#5e3673',accent:'#ffc0ef',fog:'#d597ff14'}];
-const WEAPONS={pulse:{name:'Pulse Cannon',icon:'•',color:'#fff0a5',cool:.30,damage:5.3,speed:820},scatter:{name:'Spread Shot',icon:'✣',color:'#ffb0df',cool:.68,damage:3.2,speed:720},missile:{name:'Homing Missiles',icon:'◇',color:'#b9ff8e',cool:.92,damage:8.4,speed:560},rail:{name:'Railgun',icon:'━',color:'#fff',cool:1.08,damage:12.5,speed:1350},flak:{name:'Flak Cannon',icon:'✹',color:'#ff977d',cool:.80,damage:7.4,speed:650},arc:{name:'Chain Lightning',icon:'ϟ',color:'#9fc7ff',cool:.95,damage:6.4,speed:900},drone:{name:'Attack Drones',icon:'⊙',color:'#7fffc5',cool:.58,damage:4.1,speed:880},laser:{name:'Rapid Laser',icon:'▸',color:'#ff89ec',cool:.16,damage:2.5,speed:1600},nova:{name:'Heavy Bombs',icon:'✦',color:'#ffd27a',cool:1.28,damage:14,speed:520}};
-const ENEMIES={scout:{hp:8,speed:155,fire:2.7,damage:1,xp:1,salvage:1,size:15,color:'#a9ef8c'},dart:{hp:6,speed:235,fire:99,damage:1,xp:1,salvage:1,size:12,color:'#ff879a'},gunner:{hp:18,speed:120,fire:1.8,damage:1,xp:2,salvage:2,size:20,color:'#8ce6de'},tank:{hp:46,speed:82,fire:2.2,damage:2,xp:4,salvage:4,size:28,color:'#f2b96b'},sniper:{hp:16,speed:92,fire:3.8,damage:2,xp:3,salvage:3,size:18,color:'#ff9a78'},swarm:{hp:4,speed:265,fire:4,damage:1,xp:1,salvage:1,size:9,color:'#e8ff92'},bomber:{hp:30,speed:98,fire:3,damage:2,xp:3,salvage:4,size:23,color:'#ffa86e'},guardian:{hp:35,speed:90,fire:2.5,damage:1,xp:4,salvage:4,size:24,color:'#73c9ff'},splitter:{hp:20,speed:130,fire:2.8,damage:1,xp:3,salvage:3,size:19,color:'#f09bd7'},charger:{hp:22,speed:120,fire:99,damage:2,xp:3,salvage:3,size:19,color:'#ff6687'},healer:{hp:25,speed:88,fire:99,damage:1,xp:4,salvage:5,size:21,color:'#82ffbc'},weaver:{hp:18,speed:125,fire:2.2,damage:1,xp:3,salvage:3,size:18,color:'#c7a8ff'}};
-const BOSSES=[{name:'Glimmer Maw',color:'#ff7198',accent:'#ffe6ee'},{name:'Cinder Throne',color:'#ff895b',accent:'#ffd27a'},{name:'Archive Crown',color:'#71e7df',accent:'#c8ffff'},{name:'Storm Seraph',color:'#8bb9ff',accent:'#fff'},{name:'Violet Oracle',color:'#cf7dff',accent:'#ffc0ef'}];
-const U=[
-{id:'hull',name:'More Hull',group:'survival',base:3,describe:v=>`+${v} maximum hull and heal ${Math.ceil(v/2)} hull`,apply:v=>{S.maxHull+=v;S.hull=Math.min(S.maxHull,S.hull+Math.ceil(v/2));}},
-{id:'shield',name:'Better Shields',group:'survival',base:2,describe:v=>`+${v} maximum shield and fully recharge it`,apply:v=>{S.maxShield+=v;S.shield=S.maxShield;S.shieldRegen+=.012*v;}},
-{id:'repair',name:'Auto Repair',group:'survival',base:.018,describe:v=>`Repair 1 hull every ${Math.max(5,Math.round(1/v))} seconds`,apply:v=>S.stats.repair+=v},
-{id:'dodge',name:'Better Dodging',group:'survival',base:.07,describe:v=>`Autopilot reacts ${Math.round(v*100)}% earlier to danger`,apply:v=>S.stats.dodge=Math.min(.82,S.stats.dodge+v)},
-{id:'speed',name:'Faster Engines',group:'survival',base:.15,describe:v=>`+${Math.round(v*100)}% movement speed`,apply:v=>S.stats.speed+=v},
-{id:'armor',name:'Stronger Armor',group:'survival',base:.08,describe:v=>`+${Math.round(v*100)}% chance to reduce incoming damage`,apply:v=>S.stats.armor=Math.min(.75,S.stats.armor+v)},
-{id:'damage',name:'More Damage',group:'offense',base:.18,describe:v=>`+${Math.round(v*100)}% weapon damage`,apply:v=>S.stats.damage+=v},
-{id:'rate',name:'Faster Firing',group:'offense',base:.15,describe:v=>`+${Math.round(v*100)}% fire rate`,apply:v=>S.stats.rate+=v},
-{id:'crit',name:'Critical Hits',group:'offense',base:.06,describe:v=>`+${Math.round(v*100)}% chance to deal double damage`,apply:v=>S.stats.crit=Math.min(.7,S.stats.crit+v)},
-{id:'projectile',name:'Faster Bullets',group:'offense',base:.15,describe:v=>`+${Math.round(v*100)}% projectile speed`,apply:v=>S.stats.projectile+=v},
-{id:'pierce',name:'Piercing Shots',group:'offense',base:1,describe:v=>`Shots can pass through ${v} extra ${v===1?'enemy':'enemies'}`,apply:v=>S.stats.pierce+=v},
-{id:'splash',name:'Bigger Explosions',group:'offense',base:1,describe:v=>`Explosive weapons gain ${v} level${v===1?'':'s'} of blast radius`,apply:v=>S.stats.splash+=v},
-{id:'salvage',name:'More Salvage',group:'utility',base:.2,describe:v=>`+${Math.round(v*100)}% salvage from destroyed enemies`,apply:v=>S.stats.salvage+=v},
-{id:'xp',name:'Faster Upgrades',group:'utility',base:.15,describe:v=>`+${Math.round(v*100)}% upgrade progress from kills`,apply:v=>S.stats.xp+=v},
-{id:'luck',name:'Better Luck',group:'utility',base:.05,describe:v=>`+${Math.round(v*100)}% better odds of high-rarity choices`,apply:v=>S.stats.luck=Math.min(.75,S.stats.luck+v)}];
-const SPECIALS=[{id:'secondChance',name:'Second Chance',rarity:2,desc:'Survive one fatal hit each run.',effect:'Once: revive at 40% hull',apply(){S.specials.secondChance=(S.specials.secondChance||0)+1;}},{id:'glassCannon',name:'Glass Cannon',rarity:2,desc:'Hit much harder, but give up some durability.',effect:'+60% damage, -3 max hull',apply(){S.stats.damage+=.6;S.maxHull=Math.max(6,S.maxHull-3);S.hull=Math.min(S.hull,S.maxHull);}},{id:'emergency',name:'Emergency Power',rarity:2,desc:'The ship fights harder when badly damaged.',effect:'Below 35% hull: +40% damage and fire rate',apply(){S.specials.emergency=1;}},{id:'combatRepair',name:'Combat Repair',rarity:2,desc:'Destroying enemies repairs the ship over time.',effect:'Every 15 kills: repair 1 hull',apply(){S.specials.combatRepair=(S.specials.combatRepair||0)+1;}},{id:'pointDefense',name:'Point Defense',rarity:3,desc:'A small defense gun deletes incoming shots.',effect:'Destroy every 9th enemy bullet',apply(){S.specials.pointDefense=(S.specials.pointDefense||0)+1;}},{id:'smartAI',name:'Smart Autopilot',rarity:3,desc:'The autopilot reads threats sooner and moves faster.',effect:'+15% dodge reaction, +20% movement speed',apply(){S.stats.dodge=Math.min(.82,S.stats.dodge+.15);S.stats.speed+=.2;}},{id:'arsenal',name:'Weapon Mastery',rarity:3,desc:'Improve every weapon already installed.',effect:'+1 level to all installed weapons',apply(){for(const k of Object.keys(S.weapons))if(S.weapons[k])S.weapons[k]=Math.min(15,S.weapons[k]+1);}},{id:'balanced',name:'Perfect Tune-Up',rarity:4,desc:'A huge all-round improvement with no downside.',effect:'+30% damage, +25% fire rate, +3 hull, +2 shield',apply(){S.stats.damage+=.3;S.stats.rate+=.25;S.maxHull+=3;S.hull+=3;S.maxShield+=2;S.shield=S.maxShield;}}];
-const SYNERGIES=[{id:'regenShield',name:'Self-Recharging Defense',desc:'Strong shields + repair now support each other.',test:s=>s.maxShield>=7&&s.stats.repair>=.05,apply:s=>{s.shieldRegen+=.035;s.stats.repair+=.012;}},{id:'agile',name:'Agile Autopilot',desc:'Fast engines + good dodging make movement much safer.',test:s=>s.stats.dodge>=.32&&s.stats.speed>=1.45,apply:s=>{s.stats.dodge=Math.min(.82,s.stats.dodge+.07);s.stats.speed+=.1;}},{id:'fullAuto',name:'Full Auto',desc:'High damage + fire rate boost each other.',test:s=>s.stats.damage>=1.7&&s.stats.rate>=1.45,apply:s=>{s.stats.damage+=.12;s.stats.rate+=.12;}},{id:'treasure',name:'Treasure Hunter',desc:'Luck + salvage make each kill more valuable.',test:s=>s.stats.luck>=.15&&s.stats.salvage>=1.5,apply:s=>{s.stats.salvage+=.2;s.stats.xp+=.08;}},{id:'blastCrit',name:'Explosive Criticals',desc:'Critical hits can trigger extra blast damage.',test:s=>s.stats.crit>=.18&&s.stats.splash>=2,apply:s=>s.specials.blastCrit=1},{id:'pierceRain',name:'Piercing Barrage',desc:'Fast fire + piercing shots tear through groups.',test:s=>s.stats.pierce>=3&&s.stats.rate>=1.35,apply:s=>{s.stats.pierce+=1;s.stats.rate+=.08;}},{id:'tank',name:'Tank Build',desc:'Large hull + armor produces steady self-repair.',test:s=>s.maxHull>=20&&s.stats.armor>=.22,apply:s=>{s.stats.repair+=.018;s.stats.armor=Math.min(.75,s.stats.armor+.04);}},{id:'droneDefense',name:'Escort Screen',desc:'Attack drones help intercept incoming fire.',test:s=>s.weapons.drone>=4&&s.stats.dodge>=.25,apply:s=>s.specials.droneDefense=1},{id:'missileBarrage',name:'Missile Barrage',desc:'Homing missiles launch in pairs.',test:s=>s.weapons.missile>=4&&s.weapons.scatter>=3,apply:s=>s.specials.missileBarrage=1},{id:'beamCannon',name:'Beam Cannon',desc:'Railgun shots gain energy from the rapid laser.',test:s=>s.weapons.laser>=4&&s.weapons.rail>=3,apply:s=>s.specials.beamCannon=1},{id:'chainBombs',name:'Chain Detonations',desc:'Heavy bombs and flak can trigger secondary explosions.',test:s=>s.weapons.nova>=4&&s.weapons.flak>=3,apply:s=>s.specials.chainBombs=1}];
-const stars=Array.from({length:190},()=>({x:rand(0,W),y:rand(0,H),z:rand(.1,1),s:chance(.15)?2:1}));let S,raf=0,last=0;
-function fresh(){return{phase:'menu',time:0,level:1,xp:0,xpNeed:55,upgradeReady:false,lastUpgradeAt:0,salvage:0,hull:14,maxHull:14,shield:3,maxShield:3,shieldRegen:.075,shieldDelay:0,threat:.55,grace:14,kills:0,bosses:0,openingPick:0,worldSpeed:1.45,stats:{damage:1,rate:1,dodge:.12,speed:1.12,repair:.008,luck:0,armor:.05,crit:.03,xp:1,salvage:1,projectile:1,pierce:0,splash:0},weapons:{pulse:1,scatter:0,missile:0,rail:0,flak:0,arc:0,drone:0,laser:0,nova:0},cooldowns:{},upgrades:{},specials:{},synergies:{},choiceQueue:[],ship:{x:165,y:H/2,targetY:H/2,ai:0,inv:0,tilt:0},enemies:[],bullets:[],shots:[],particles:[],popups:[],banners:[],boss:null,director:{spawn:2.6,wave:11,event:76,boss:122,breather:50},combo:0,comboTimer:0,screenShake:0,flash:0,bulletsSeen:0,nextMilestone:60,best:Number(localStorage.getItem('starwardBest')||0)}}
-const fmt=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`,fmtRepair=v=>v<=0?'OFF':`1 / ${Math.max(1,Math.round(1/v))}s`;
-function popup(text,x,y,color='#fff',life=.85){S.popups.push({text,x,y,color,life,max:life})}function banner(text,color='#fff',sub=''){S.banners.push({text,color,sub,life:2.6,max:2.6})}function burst(x,y,color,n=12,speed=180,size=3){for(let i=0;i<n;i++){const a=rand(0,Math.PI*2),v=rand(speed*.25,speed);S.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.25,.7),max:.7,color,size:chance(.25)?size*2:size})}}
-function rarity(min=0){const ws=RARITIES.map((r,i)=>i<min?0:r.weight*(i?1+S.stats.luck*i*1.25:1));let total=ws.reduce((a,b)=>a+b,0),r=Math.random()*total;for(let i=0;i<RARITIES.length;i++){r-=ws[i];if(r<=0)return RARITIES[i]}return RARITIES[min]}
-function weaponCard(min=0){const key=pick(Object.keys(WEAPONS)),w=WEAPONS[key],rar=rarity(min),cur=S.weapons[key],gain=Math.max(1,Math.round(rar.power*.7));return{rarity:rar,title:cur?`Upgrade ${w.name}`:`Unlock ${w.name}`,desc:cur?`${w.name} is currently level ${cur}.`:`Adds ${w.name} to the ship's automatic weapons.`,effect:`${cur?'Increase':'Start at'} level ${cur?cur+gain:gain}`,apply(){S.weapons[key]=Math.min(15,cur+gain)}}}
-function statCard(group=null,min=0){const pool=group?U.filter(x=>x.group===group):U,d=pick(pool),rar=rarity(min);let v=d.base*rar.power*rand(.92,1.08);if(['hull','shield','pierce','splash'].includes(d.id))v=Math.max(1,Math.round(v));return{rarity:rar,title:d.name,desc:`Improves ${d.name.toLowerCase()}.`,effect:d.describe(v),apply(){d.apply(v)}}}
-function specialCard(min=2){const a=SPECIALS.filter(s=>s.rarity>=min&&!S.upgrades[`special:${s.id}`]);if(!a.length)return statCard(null,min);const s=pick(a),rar=RARITIES[Math.max(min,s.rarity)];return{rarity:rar,title:s.name,desc:s.desc,effect:s.effect,apply(){s.apply();S.upgrades[`special:${s.id}`]=1}}}
-function draft(spec=['random','random','random'],min=0){return spec.map(k=>k==='weapon'?weaponCard(min):['survival','offense','utility'].includes(k)?statCard(k,min):k==='special'?specialCard(Math.max(2,min)):chance(.30)?weaponCard(min):chance(.08+S.stats.luck*.12)?specialCard(Math.max(2,min)):statCard(null,min))}
-function uiUpdate(){ui.time.textContent=fmt(S.time);ui.hull.textContent=`${Math.max(0,Math.ceil(S.hull))}/${S.maxHull}`;ui.shield.textContent=`${Math.floor(S.shield)}/${S.maxShield}`;ui.level.textContent=S.level;ui.salvage.textContent=Math.floor(S.salvage);ui.damage.textContent=`${Math.round(S.stats.damage*100)}%`;ui.rate.textContent=`${Math.round(S.stats.rate*100)}%`;ui.dodge.textContent=`${Math.round(S.stats.dodge*100)}%`;ui.thrust.textContent=`${Math.round(S.stats.speed*100)}%`;ui.repair.textContent=fmtRepair(S.stats.repair);ui.luck.textContent=`${Math.round(S.stats.luck*100)}%`;ui.xp.textContent=S.upgradeReady?'UPGRADE READY':`${Math.floor(S.xp)} / ${S.xpNeed}`;ui.xpBar.style.width=`${clamp(S.xp/S.xpNeed*100,0,100)}%`;const c=[];for(const[k,l]of Object.entries(S.weapons))if(l)c.push(`<span class="weapon-chip">${WEAPONS[k].icon} ${WEAPONS[k].name} Lv.${l}</span>`);for(const s of SYNERGIES)if(S.synergies[s.id])c.push(`<span class="synergy-chip">★ ${s.name}</span>`);for(const s of SPECIALS)if(S.upgrades[`special:${s.id}`])c.push(`<span class="special-chip">◆ ${s.name}</span>`);ui.chips.innerHTML=c.join('')||'<span class="empty-chip">Pulse Cannon Lv.1</span>'}
-function hide(){overlay.classList.add('hidden');choiceGrid.classList.add('hidden')}
-function choices({type,heading,body,cards,progress='',onPick}){S.phase='choice';eyebrow.textContent=type;overlayTitle.textContent=heading;overlayText.innerHTML=`${progress?`<div class="draft-progress">${progress}</div>`:''}${body}`;choiceGrid.innerHTML='';choiceGrid.classList.remove('hidden');startBtn.classList.add('hidden');overlay.classList.remove('hidden');cards.forEach(c=>{const b=document.createElement('button');b.className=`choice-card r-${c.rarity.cls}`;b.innerHTML=`<span class="rarity">${c.rarity.name.toUpperCase()}</span><h3>${c.title}</h3><p>${c.desc}</p><span class="effect">${c.effect}</span>`;b.addEventListener('click',()=>{c.apply();checkSynergies();uiUpdate();hide();onPick()},{once:true});choiceGrid.appendChild(b)})}
-function opening(){const i=S.openingPick,spec=[['weapon','survival','offense'],['survival','weapon','utility'],['offense','survival','weapon'],['survival','offense','random'],['weapon','special','survival']];choices({type:'PRE-FLIGHT',heading:'Build your ship',body:'Pick one upgrade. The run starts after five choices.',cards:draft(spec[i],i===4?1:0),progress:`STARTING CHOICE ${i+1} OF 5`,onPick(){S.openingPick++;if(S.openingPick<5)setTimeout(opening,50);else begin()}})}
-function start(){cancelAnimationFrame(raf);S=fresh();uiUpdate();opening()}function begin(){hide();S.phase='running';S.grace=14;last=performance.now();banner('SHIP ONLINE','#8ff7ff','Autopilot engaged');raf=requestAnimationFrame(loop)}function queue(fn){S.choiceQueue.push(fn)}function resume(){if(S.choiceQueue.length)setTimeout(S.choiceQueue.shift(),60);else{S.phase='running';hide()}}
-function upgrade(label='UPGRADE',min=0){S.level++;S.upgradeReady=false;S.xp=Math.max(0,S.xp-S.xpNeed);S.xpNeed=Math.round(S.xpNeed*1.18+8);S.lastUpgradeAt=S.time;choices({type:label,heading:'Choose one upgrade',body:'Make one meaningful change, then let the ship run.',cards:draft(['random','survival','random'],min),onPick:resume})}
-function gainXP(n){S.xp+=n*S.stats.xp;if(S.xp>=S.xpNeed)S.upgradeReady=true}function checkUpgrade(){if(S.upgradeReady&&S.time-S.lastUpgradeAt>=48&&S.phase==='running'&&!S.choiceQueue.length)queue(()=>upgrade())}
-function checkSynergies(){for(const s of SYNERGIES)if(!S.synergies[s.id]&&s.test(S)){S.synergies[s.id]=1;s.apply(S);banner(`BUILD BONUS: ${s.name}`,'#ffe56b',s.desc);burst(S.ship.x,S.ship.y,'#ffe56b',28,220,3)}}
-function spawn(type,y=rand(65,H-65),elite=false){const d=ENEMIES[type],scale=1+S.time/270;S.enemies.push({type,x:W+45,y,baseY:y,hp:d.hp*scale*(elite?2:1),maxHp:d.hp*scale*(elite?2:1),speed:d.speed,fire:rand(.6,Math.max(.8,d.fire)),elite,size:d.size,color:d.color,t:0,charge:0})}
-function wave(){const pool=['scout','dart','gunner'];if(S.time>40)pool.push('swarm','sniper','weaver');if(S.time>85)pool.push('bomber','guardian','splitter','charger');if(S.time>150)pool.push('tank','healer');const count=Math.min(9,3+Math.floor(S.time/75)),pattern=pick(['line','sine','cluster']);for(let i=0;i<count;i++){const y=pattern==='line'?80+i*(H-160)/Math.max(1,count-1):pattern==='sine'?H/2+Math.sin(i*1.15)*155:rand(100,H-100);spawn(pick(pool),y,chance(.03+S.time/7000))}}
-function target(){let b=S.boss||null,x=b?b.x:Infinity;for(const e of S.enemies)if(e.hp>0&&e.x<x){b=e;x=e.x}return b}function dmg(){return S.stats.damage*(S.specials.emergency&&S.hull/S.maxHull<.35?1.4:1)}function rate(){return S.stats.rate*(S.specials.emergency&&S.hull/S.maxHull<.35?1.4:1)}
-function weapons(dt){for(const k of Object.keys(WEAPONS))S.cooldowns[k]=Math.max(0,(S.cooldowns[k]||0)-dt);const t=target();if(!t)return;for(const[k,l]of Object.entries(S.weapons)){if(l<=0||S.cooldowns[k]>0)continue;const w=WEAPONS[k];S.cooldowns[k]=w.cool/(rate()*Math.sqrt(l));let n=k==='scatter'?Math.min(9,2+l):k==='drone'?Math.min(5,l):1;if(k==='missile'&&S.specials.missileBarrage)n=2;for(let i=0;i<n;i++){const base=Math.atan2(t.y-S.ship.y,t.x-S.ship.x),a=base+(i-(n-1)/2)*(k==='scatter'?.105:.035),sp=(w.speed+l*38)*S.stats.projectile,crit=chance(S.stats.crit);S.shots.push({kind:k,x:S.ship.x+24,y:S.ship.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,damage:(w.damage+l*1.35)*dmg()*(crit?2:1),life:3.2,color:w.color,pierce:S.stats.pierce+(k==='rail'?2:0),splash:S.stats.splash+((k==='flak'||k==='nova')?1+l*.2:0),homing:k==='missile',crit,trail:[]})}}}
-function hurt(amount){if(S.ship.inv>0||S.phase!=='running')return;if(S.specials.pointDefense&&++S.bulletsSeen%9===0)return;let d=amount;if(S.shield>0){const a=Math.min(S.shield,d);S.shield-=a;d-=a}if(d>0&&chance(S.stats.armor))d=Math.max(0,d-1);if(d>0){S.hull-=d;S.screenShake=Math.max(S.screenShake,5);S.flash=.12;popup(`-${d}`,S.ship.x,S.ship.y-24,'#ff8095')}S.ship.inv=.45;S.shieldDelay=4;if(S.hull<=0){if(S.specials.secondChance){S.specials.secondChance--;S.hull=Math.max(1,S.maxHull*.4);S.shield=S.maxShield;S.ship.inv=2;banner('SECOND CHANCE','#ffe56b','Back in the fight')}else end()}}
-function kill(e){const d=ENEMIES[e.type];S.salvage+=d.salvage*S.stats.salvage;S.kills++;S.combo++;S.comboTimer=2;gainXP(d.xp);burst(e.x,e.y,e.color,e.elite?24:12,e.elite?250:170,e.elite?4:3);S.screenShake=Math.max(S.screenShake,e.elite?3:1.3);if(S.specials.combatRepair&&S.kills%15===0){S.hull=Math.min(S.maxHull,S.hull+1);popup('+1 HULL',S.ship.x,S.ship.y-28,'#8fffb2',1.1)}if(e.type==='splitter'){spawn('swarm',e.y-18);spawn('swarm',e.y+18);S.enemies.at(-1).x=e.x;S.enemies.at(-2).x=e.x}}
-function autopilot(dt){S.ship.ai-=dt;if(S.ship.ai<=0){S.ship.ai=Math.max(.045,.22*(1-S.stats.dodge));let by=H/2,br=Infinity;for(let y=58;y<H-48;y+=28){let r=Math.abs(y-H/2)*.0014;for(const b of S.bullets){const dx=b.x-S.ship.x;if(dx>-20&&dx<380)r+=Math.max(0,9-Math.abs(y-b.y)/10)*(1+S.stats.dodge*2)}for(const e of S.enemies){const dx=e.x-S.ship.x;if(dx>0&&dx<210)r+=Math.max(0,8-Math.abs(y-e.y)/13)}if(r<br){br=r;by=y}}S.ship.targetY=by}const old=S.ship.y,m=275*S.stats.speed*dt;S.ship.y+=clamp(S.ship.targetY-S.ship.y,-m,m);S.ship.y=clamp(S.ship.y,42,H-38);S.ship.tilt=(S.ship.y-old)*.12;S.ship.inv=Math.max(0,S.ship.inv-dt)}
-function enemyFire(e){const d=ENEMIES[e.type],a=Math.atan2(S.ship.y-e.y,S.ship.x-e.x),sp=(e.type==='sniper'?330:195+S.time*.09)*S.worldSpeed,spread=e.type==='bomber'?[-.17,0,.17]:e.type==='weaver'?[-.1,.1]:[0];for(const off of spread)S.bullets.push({x:e.x,y:e.y,vx:Math.cos(a+off)*sp,vy:Math.sin(a+off)*sp,damage:d.damage,life:5.5,hot:e.type==='sniper'})}
-function enemies(dt){for(const e of S.enemies){const d=ENEMIES[e.type];e.t+=dt;let mv=d.speed*S.worldSpeed*dt*(.80+S.threat*.08);if(e.type==='charger'&&e.x<700){if(!e.charge)e.charge=.8;e.charge-=dt;if(e.charge<0)mv*=3.2}e.x-=mv;if(e.type==='dart')e.y=e.baseY+Math.sin(e.t*5)*85;if(e.type==='swarm')e.y=e.baseY+Math.sin(e.t*6+e.x*.02)*48;if(e.type==='bomber')e.y=e.baseY+Math.sin(e.t*1.7)*60;if(e.type==='weaver')e.y=e.baseY+Math.sin(e.t*3.2)*105;if(e.type==='healer'){const a=S.enemies.find(q=>q!==e&&q.hp>0&&q.hp<q.maxHp);if(a)a.hp=Math.min(a.maxHp,a.hp+3*dt)}e.fire-=dt;if(e.fire<=0&&e.x<W-45&&d.fire<90&&S.grace<=0){e.fire=d.fire*rand(.9,1.22)/Math.sqrt(S.threat);enemyFire(e)}if(Math.hypot(e.x-S.ship.x,e.y-S.ship.y)<e.size+13){e.hp=0;hurt(d.damage)}}}
-function projectiles(dt){for(const b of S.bullets){b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;if(S.specials.droneDefense&&Math.hypot(b.x-S.ship.x,b.y-S.ship.y)<70&&chance(.04)){b.life=0;burst(b.x,b.y,'#7fffc5',4,80,2)}if(Math.hypot(b.x-S.ship.x,b.y-S.ship.y)<14){b.life=0;hurt(b.damage)}}for(const sh of S.shots){sh.trail.push({x:sh.x,y:sh.y});if(sh.trail.length>5)sh.trail.shift();if(sh.homing){const t=target();if(t){const desired=Math.atan2(t.y-sh.y,t.x-sh.x),sp=Math.hypot(sh.vx,sh.vy),cur=Math.atan2(sh.vy,sh.vx),diff=((desired-cur+Math.PI*3)%(Math.PI*2))-Math.PI,a=cur+clamp(diff,-4*dt,4*dt);sh.vx=Math.cos(a)*sp;sh.vy=Math.sin(a)*sp}}sh.x+=sh.vx*dt;sh.y+=sh.vy*dt;sh.life-=dt;for(const e of S.enemies){if(e.hp<=0)continue;if(Math.hypot(sh.x-e.x,sh.y-e.y)<e.size+5){e.hp-=sh.damage;if(sh.crit&&S.specials.blastCrit)for(const o of S.enemies)if(o!==e&&Math.hypot(o.x-e.x,o.y-e.y)<80)o.hp-=sh.damage*.35;if(sh.splash){const r=45+sh.splash*17;for(const o of S.enemies)if(o!==e&&o.hp>0&&Math.hypot(o.x-e.x,o.y-e.y)<r)o.hp-=sh.damage*.32}if(sh.kind==='arc'){const o=S.enemies.find(o=>o!==e&&o.hp>0&&Math.hypot(o.x-e.x,o.y-e.y)<120);if(o)o.hp-=sh.damage*.6}if(sh.kind==='rail'&&S.specials.beamCannon)e.hp-=sh.damage*.35;if((sh.kind==='nova'||sh.kind==='flak')&&S.specials.chainBombs&&chance(.25))for(const o of S.enemies)if(o!==e&&Math.hypot(o.x-e.x,o.y-e.y)<110)o.hp-=sh.damage*.25;if(sh.pierce>0)sh.pierce--;else sh.life=0;break}}if(S.boss&&Math.hypot(sh.x-S.boss.x,sh.y-S.boss.y)<S.boss.size){S.boss.hp-=sh.damage;if(sh.pierce<=0)sh.life=0}}}
-function bossSpawn(){const type=BOSSES[S.bosses%BOSSES.length],hp=220*(1+S.bosses*.55);S.boss={type,x:W+90,y:H/2,hp,maxHp:hp,size:64,fire:1.35,t:0,phase:1};banner('DREADNOUGHT INCOMING',type.color,type.name);S.screenShake=5}
-function boss(dt){if(!S.boss)return;const b=S.boss;b.t+=dt;b.x+=(W-170-b.x)*dt*.38;b.y=H/2+Math.sin(b.t*(1.2+b.phase*.15))*135;b.phase=b.hp/b.maxHp<.33?3:b.hp/b.maxHp<.66?2:1;b.fire-=dt;if(b.fire<=0&&S.grace<=0){b.fire=Math.max(.4,1.25-b.phase*.14-S.bosses*.04);const base=Math.atan2(S.ship.y-b.y,S.ship.x-b.x),n=3+b.phase*2;for(let i=0;i<n;i++){const off=(i-(n-1)/2)*(.09+b.phase*.018),sp=(210+b.phase*25)*S.worldSpeed;S.bullets.push({x:b.x,y:b.y,vx:Math.cos(base+off)*sp,vy:Math.sin(base+off)*sp,damage:b.phase===3?2:1,life:7})}}if(b.hp<=0){const name=b.type.name;burst(b.x,b.y,b.type.color,70,360,5);S.screenShake=12;S.boss=null;S.bosses++;S.salvage+=18;S.hull=Math.min(S.maxHull,S.hull+Math.max(2,S.maxHull*.2));S.shield=S.maxShield;gainXP(18);banner(`${name} DESTROYED`,'#ffe56b','Boss reward ready');queue(()=>upgrade('BOSS REWARD',1))}}
-function event(){const cards=[{rarity:RARITIES[0],title:'Repair Stop',desc:'Take a short maintenance stop.',effect:'Heal 45% hull and recharge shields',apply(){S.hull=Math.min(S.maxHull,S.hull+S.maxHull*.45);S.shield=S.maxShield}},{rarity:RARITIES[1],title:'Buy an Upgrade',desc:'Spend salvage on better equipment.',effect:'Spend 10 salvage → Epic-or-better choice',apply(){S.salvage=Math.max(0,S.salvage-10);queue(()=>upgrade('SALVAGE UPGRADE',1))}},{rarity:RARITIES[2],title:'Take the Dangerous Route',desc:'Accept more enemies in exchange for stronger rewards.',effect:'+12% threat → two upgrade choices',apply(){S.threat+=.12;queue(()=>upgrade('DANGER REWARD 1',1));queue(()=>upgrade('DANGER REWARD 2',0))}}];choices({type:'EVENT',heading:'Route decision',body:'Choose what matters most for the next stretch of the run.',cards,onPick:resume})}
-function pressure(){const hp=S.hull/S.maxHull;if(hp<.3)return .7;if(hp<.5)return .84;if(hp>.85&&S.shield>S.maxShield*.5)return 1.12;return 1}
-function director(dt){if(S.grace>0){S.grace-=dt;return}const p=pressure();S.director.spawn-=dt;S.director.wave-=dt;S.director.event-=dt;S.director.boss-=dt;S.director.breather-=dt;if(S.director.spawn<=0){const pool=S.time<50?['scout','dart']:S.time<100?['scout','dart','gunner','weaver']:['scout','dart','gunner','weaver','sniper','charger'];spawn(pick(pool));S.director.spawn=rand(1.8,2.8)/(S.threat*p)}if(S.director.wave<=0){wave();S.director.wave=rand(8.5,12)/Math.sqrt(S.threat*p)}if(S.director.event<=0){S.director.event=rand(78,100);queue(event)}if(S.director.boss<=0&&!S.boss){S.director.boss=125+rand(12,25);bossSpawn()}if(S.director.breather<=0){S.grace=Math.max(S.grace,4.5);S.director.breather=rand(48,62);banner('CLEAR AIR','#8ff7ff','A few seconds to recover')}}
-function milestones(){if(S.time>=S.nextMilestone){const m=Math.floor(S.nextMilestone/60);banner(`${m} MINUTE${m===1?'':'S'} SURVIVED`,'#ffe56b',m%2===0?'Stronger upgrade odds next time':'The run is still growing');if(m%2===0)S.stats.luck=Math.min(.75,S.stats.luck+.02);S.nextMilestone+=60}}
-function update(dt){S.time+=dt;S.worldSpeed=1.45+Math.min(.45,S.time/900);S.threat=.55+Math.min(2.75,S.time/150);S.hull=Math.min(S.maxHull,S.hull+S.stats.repair*dt);if(S.shieldDelay>0)S.shieldDelay-=dt;else S.shield=Math.min(S.maxShield,S.shield+S.shieldRegen*dt);if(S.comboTimer>0){S.comboTimer-=dt;if(S.comboTimer<=0)S.combo=0}S.screenShake=Math.max(0,S.screenShake-dt*18);S.flash=Math.max(0,S.flash-dt);autopilot(dt);weapons(dt);director(dt);enemies(dt);projectiles(dt);boss(dt);milestones();checkUpgrade();for(const e of S.enemies)if(e.hp<=0&&!e.dead){e.dead=true;kill(e)}S.enemies=S.enemies.filter(e=>!e.dead&&e.x>-80);S.bullets=S.bullets.filter(b=>b.life>0&&b.x>-80&&b.x<W+80&&b.y>-70&&b.y<H+70);S.shots=S.shots.filter(s=>s.life>0&&s.x<W+100&&s.y>-80&&s.y<H+80);for(const p of S.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.vy*=.98;p.life-=dt}S.particles=S.particles.filter(p=>p.life>0);for(const p of S.popups){p.y-=26*dt;p.life-=dt}S.popups=S.popups.filter(p=>p.life>0);for(const b of S.banners)b.life-=dt;S.banners=S.banners.filter(b=>b.life>0);uiUpdate();if(S.phase==='running'&&S.choiceQueue.length){const fn=S.choiceQueue.shift();fn()}}
-function drawEnemy(e){ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle=e.color;ctx.shadowColor=e.color;ctx.shadowBlur=e.elite?14:5;if(e.type==='tank'){ctx.fillRect(-e.size,-12,e.size*2,24);ctx.fillRect(-8,-20,18,40)}else if(e.type==='swarm'){ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-10,-8);ctx.lineTo(-5,0);ctx.lineTo(-10,8);ctx.closePath();ctx.fill()}else if(e.type==='guardian'){ctx.beginPath();ctx.arc(0,0,e.size,0,Math.PI*2);ctx.strokeStyle=e.color;ctx.lineWidth=4;ctx.stroke();ctx.fillRect(-9,-9,18,18)}else if(e.type==='healer'){ctx.fillRect(-5,-20,10,40);ctx.fillRect(-20,-5,40,10)}else{ctx.beginPath();ctx.moveTo(-e.size,0);ctx.lineTo(0,-e.size*.7);ctx.lineTo(e.size,0);ctx.lineTo(0,e.size*.7);ctx.closePath();ctx.fill()}ctx.shadowBlur=0;if(e.elite){ctx.strokeStyle='#ffe56b';ctx.lineWidth=2;ctx.strokeRect(-e.size-4,-e.size*.75,e.size*2+8,e.size*1.5)}ctx.restore()}
-function draw(){const biome=BIOMES[Math.floor(S.time/60)%BIOMES.length];ctx.save();if(S.screenShake)ctx.translate(rand(-S.screenShake,S.screenShake),rand(-S.screenShake,S.screenShake));const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,biome.top);g.addColorStop(1,biome.bottom);ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);ctx.fillStyle=biome.fog;for(let i=0;i<5;i++){const x=(W+250)-(S.time*(20+i*5)*S.worldSpeed+i*210)%(W+500)-200,y=90+i*90;ctx.beginPath();ctx.arc(x,y,110+i*18,0,Math.PI*2);ctx.fill()}for(const st of stars){st.x-=st.z*3.2*S.worldSpeed;if(st.x<0)st.x=W;ctx.fillStyle=`rgba(255,255,255,${.18+st.z*.65})`;ctx.fillRect(st.x,st.y,st.s,st.s)}for(let i=0;i<7;i++){const x=W-((S.time*85*S.worldSpeed+i*170)%(W+220));ctx.fillStyle=`rgba(255,255,255,${.035+i*.006})`;ctx.fillRect(x,55+(i*71)%430,70+i*8,1)}ctx.fillStyle='#02061155';ctx.fillRect(0,0,W,31);ctx.fillStyle=biome.accent;ctx.font='bold 12px monospace';ctx.fillText(`${biome.name}  •  SPEED ${S.worldSpeed.toFixed(1)}×  •  THREAT ${S.threat.toFixed(1)}×${S.grace>0?`  •  SAFE ${Math.ceil(S.grace)}s`:''}`,15,20);ctx.save();ctx.translate(S.ship.x,S.ship.y);ctx.rotate(S.ship.tilt*.02);ctx.shadowColor='#76e8f1';ctx.shadowBlur=12;ctx.fillStyle=S.ship.inv>0?'#fff':'#75e8f2';ctx.beginPath();ctx.moveTo(28,0);ctx.lineTo(-12,-10);ctx.lineTo(-23,-23);ctx.lineTo(-14,-4);ctx.lineTo(-24,0);ctx.lineTo(-14,4);ctx.lineTo(-23,23);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#c8ffff';ctx.fillRect(5,-4,11,8);ctx.fillStyle='#ffd76e';ctx.fillRect(-29,-4-rand(0,2),12+rand(0,9),8);if(S.maxShield>0&&S.shield>0){ctx.strokeStyle=`rgba(125,225,255,${.2+.35*S.shield/S.maxShield})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,31,0,Math.PI*2);ctx.stroke()}ctx.restore();for(const e of S.enemies)drawEnemy(e);for(const sh of S.shots){ctx.globalAlpha=.28;for(const t of sh.trail){ctx.fillStyle=sh.color;ctx.fillRect(t.x-4,t.y-1,8,2)}ctx.globalAlpha=1;ctx.shadowColor=sh.color;ctx.shadowBlur=8;ctx.fillStyle=sh.color;if(sh.kind==='missile'||sh.kind==='nova'){ctx.beginPath();ctx.arc(sh.x,sh.y,sh.kind==='nova'?6:4,0,Math.PI*2);ctx.fill()}else ctx.fillRect(sh.x-6,sh.y-2,12,4);ctx.shadowBlur=0}for(const b of S.bullets){ctx.shadowColor=b.hot?'#fff':'#ff7890';ctx.shadowBlur=b.hot?12:6;ctx.fillStyle=b.hot?'#fff1b0':'#ff7890';ctx.beginPath();ctx.arc(b.x,b.y,b.hot?5:4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0}for(const p of S.particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)}ctx.globalAlpha=1;for(const p of S.popups){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText(p.text,p.x,p.y)}ctx.globalAlpha=1;ctx.textAlign='left';if(S.combo>=6){ctx.fillStyle='#ffe56b';ctx.font='bold 14px monospace';ctx.fillText(`${S.combo} KILL CHAIN`,15,H-18)}if(S.boss){const b=S.boss;ctx.save();ctx.translate(b.x,b.y);ctx.shadowColor=b.type.color;ctx.shadowBlur=22;ctx.fillStyle=b.type.color;ctx.beginPath();ctx.moveTo(-68,0);ctx.lineTo(-35,-44);ctx.lineTo(28,-35);ctx.lineTo(64,0);ctx.lineTo(28,35);ctx.lineTo(-35,44);ctx.closePath();ctx.fill();ctx.fillStyle=b.type.accent;ctx.beginPath();ctx.arc(5,0,13+b.phase*2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.restore();ctx.fillStyle='#070b14cc';ctx.fillRect(W-300,43,260,13);ctx.fillStyle=b.type.color;ctx.fillRect(W-297,46,254*clamp(b.hp/b.maxHp,0,1),7);ctx.fillStyle='#fff';ctx.font='bold 10px monospace';ctx.textAlign='right';ctx.fillText(`${b.type.name}  PHASE ${b.phase}`,W-42,39);ctx.textAlign='left'}const active=S.banners[0];if(active){const a=1-Math.abs(active.life/active.max-.5)*1.4;ctx.globalAlpha=clamp(a,0,1);ctx.textAlign='center';ctx.fillStyle='#020611bb';ctx.fillRect(W/2-230,H*.17-34,460,76);ctx.fillStyle=active.color;ctx.font='bold 24px monospace';ctx.fillText(active.text,W/2,H*.17);ctx.fillStyle='#fff';ctx.font='11px monospace';ctx.fillText(active.sub,W/2,H*.17+22);ctx.textAlign='left';ctx.globalAlpha=1}if(S.flash){ctx.fillStyle=`rgba(255,255,255,${S.flash*1.3})`;ctx.fillRect(0,0,W,H)}ctx.restore()}
-function end(){S.phase='dead';cancelAnimationFrame(raf);S.best=Math.max(S.best,S.time);localStorage.setItem('starwardBest',S.best);eyebrow.textContent='RUN COMPLETE';overlayTitle.textContent=`Survived ${fmt(S.time)}`;overlayText.textContent=`Level ${S.level} • ${S.kills} enemies destroyed • ${S.bosses} bosses defeated • Best ${fmt(S.best)}`;choiceGrid.classList.add('hidden');startBtn.textContent='Build Another Ship';startBtn.classList.remove('hidden');overlay.classList.remove('hidden')}
-function loop(now){if(S.phase==='dead'||S.phase==='menu')return;const dt=Math.min(.033,(now-last)/1000||.016);last=now;if(S.phase==='running')update(dt);draw();raf=requestAnimationFrame(loop)}startBtn.addEventListener('click',start);S=fresh();uiUpdate();draw();
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('game');
+const ctx = canvas.getContext('2d');
+const overlay = $('overlay');
+const overlayTitle = $('overlayTitle');
+const overlayText = $('overlayText');
+const eyebrow = $('eyebrow');
+const choiceGrid = $('choiceGrid');
+const startBtn = $('startBtn');
+
+const ui = {
+  time: $('time'), hull: $('hull'), shield: $('shield'), level: $('level'), salvage: $('salvage'),
+  damage: $('statDamage'), rate: $('statRate'), dodge: $('statDodge'), thrust: $('statThrust'),
+  repair: $('statRepair'), luck: $('statLuck'), xp: $('xpText'), xpBar: $('xpBar'), chips: $('buildChips')
+};
+
+const W = canvas.width;
+const H = canvas.height;
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+const chance = (p) => Math.random() < p;
+ctx.imageSmoothingEnabled = false;
+
+const NORMAL_CHOICE_GAP = 68;
+const QUEUED_CHOICE_GAP = 14;
+
+const RARITIES = [
+  { name: 'Rare', cls: 'rare', weight: 58, power: 1.00 },
+  { name: 'Epic', cls: 'epic', weight: 25, power: 1.45 },
+  { name: 'Legendary', cls: 'legendary', weight: 10, power: 2.00 },
+  { name: 'Mythic', cls: 'mythic', weight: 5, power: 3.00 },
+  { name: 'God', cls: 'god', weight: 2, power: 4.50 }
+];
+
+const BIOMES = [
+  { name:'Cloudreach', top:'#081a39', bottom:'#4f9bb4', accent:'#c6ffab', fog:'#88e6ff12' },
+  { name:'Ember Belt', top:'#1b1028', bottom:'#9b413c', accent:'#ffd071', fog:'#ff9b6715' },
+  { name:'Silent Ruins', top:'#070e27', bottom:'#273b5c', accent:'#72f0e3', fog:'#72f0e310' },
+  { name:'Stormglass', top:'#070d18', bottom:'#21394f', accent:'#dceeff', fog:'#c7e6ff12' },
+  { name:'Violet Deep', top:'#160b28', bottom:'#5e3673', accent:'#ffc0ef', fog:'#d597ff14' }
+];
+
+const WEAPONS = {
+  pulse:   { name:'Pulse Cannon', icon:'•', color:'#fff0a5', cool:.29, damage:5.4, speed:900 },
+  scatter: { name:'Spread Shot', icon:'✣', color:'#ffb0df', cool:.66, damage:3.2, speed:780 },
+  missile: { name:'Homing Missiles', icon:'◇', color:'#b9ff8e', cool:.90, damage:8.6, speed:620 },
+  rail:    { name:'Railgun', icon:'━', color:'#ffffff', cool:1.06, damage:12.8, speed:1450 },
+  flak:    { name:'Flak Cannon', icon:'✹', color:'#ff977d', cool:.78, damage:7.6, speed:720 },
+  arc:     { name:'Chain Lightning', icon:'ϟ', color:'#9fc7ff', cool:.92, damage:6.5, speed:980 },
+  drone:   { name:'Attack Drones', icon:'⊙', color:'#7fffc5', cool:.56, damage:4.2, speed:950 },
+  laser:   { name:'Rapid Laser', icon:'▸', color:'#ff89ec', cool:.15, damage:2.55, speed:1750 },
+  nova:    { name:'Heavy Bombs', icon:'✦', color:'#ffd27a', cool:1.24, damage:14.4, speed:590 }
+};
+
+const ENEMIES = {
+  scout:    { hp:8,  speed:155, fire:2.8, damage:1, xp:1, salvage:1, size:15, color:'#a9ef8c' },
+  dart:     { hp:6,  speed:235, fire:99,  damage:1, xp:1, salvage:1, size:12, color:'#ff879a' },
+  gunner:   { hp:18, speed:120, fire:1.9, damage:1, xp:2, salvage:2, size:20, color:'#8ce6de' },
+  tank:     { hp:46, speed:82,  fire:2.3, damage:2, xp:4, salvage:4, size:28, color:'#f2b96b' },
+  sniper:   { hp:16, speed:92,  fire:3.9, damage:2, xp:3, salvage:3, size:18, color:'#ff9a78' },
+  swarm:    { hp:4,  speed:265, fire:4.2, damage:1, xp:1, salvage:1, size:9, color:'#e8ff92' },
+  bomber:   { hp:30, speed:98,  fire:3.2, damage:2, xp:3, salvage:4, size:23, color:'#ffa86e' },
+  guardian: { hp:35, speed:90,  fire:2.7, damage:1, xp:4, salvage:4, size:24, color:'#73c9ff' },
+  splitter: { hp:20, speed:130, fire:3.0, damage:1, xp:3, salvage:3, size:19, color:'#f09bd7' },
+  charger:  { hp:22, speed:120, fire:99,  damage:2, xp:3, salvage:3, size:19, color:'#ff6687' },
+  healer:   { hp:25, speed:88,  fire:99,  damage:1, xp:4, salvage:5, size:21, color:'#82ffbc' },
+  weaver:   { hp:18, speed:125, fire:2.4, damage:1, xp:3, salvage:3, size:18, color:'#c7a8ff' }
+};
+
+const BOSSES = [
+  { name:'Glimmer Maw', color:'#ff7198', accent:'#ffe6ee' },
+  { name:'Cinder Throne', color:'#ff895b', accent:'#ffd27a' },
+  { name:'Archive Crown', color:'#71e7df', accent:'#c8ffff' },
+  { name:'Storm Seraph', color:'#8bb9ff', accent:'#ffffff' },
+  { name:'Violet Oracle', color:'#cf7dff', accent:'#ffc0ef' }
+];
+
+const STAT_UPGRADES = [
+  {
+    id:'hull', name:'Reinforced Hull', group:'survival', base:3,
+    desc:'The ship can take more damage before the run ends.',
+    effect:v=>`+${v} maximum hull and heal ${Math.ceil(v/2)} hull`,
+    apply:v=>{ S.maxHull+=v; S.hull=Math.min(S.maxHull,S.hull+Math.ceil(v/2)); }
+  },
+  {
+    id:'shield', name:'Larger Shield', group:'survival', base:2,
+    desc:'Increase the rechargeable shield around the ship.',
+    effect:v=>`+${v} maximum shield and fully recharge it`,
+    apply:v=>{ S.maxShield+=v; S.shield=S.maxShield; S.shieldRegen+=.012*v; }
+  },
+  {
+    id:'repair', name:'Faster Repairs', group:'survival', base:.018,
+    desc:'The ship slowly repairs hull damage on its own.',
+    effect:v=>`Repair 1 hull every ${Math.max(5,Math.round(1/v))} seconds`,
+    apply:v=>{ S.stats.repair+=v; }
+  },
+  {
+    id:'dodge', name:'Better Dodging', group:'survival', base:.07,
+    desc:'The autopilot notices incoming danger sooner.',
+    effect:v=>`Autopilot reacts ${Math.round(v*100)}% earlier`,
+    apply:v=>{ S.stats.dodge=Math.min(.82,S.stats.dodge+v); }
+  },
+  {
+    id:'speed', name:'Faster Engines', group:'survival', base:.15,
+    desc:'The ship moves between safe positions more quickly.',
+    effect:v=>`+${Math.round(v*100)}% movement speed`,
+    apply:v=>{ S.stats.speed+=v; }
+  },
+  {
+    id:'armor', name:'Stronger Armor', group:'survival', base:.08,
+    desc:'Incoming hits have a chance to deal less hull damage.',
+    effect:v=>`+${Math.round(v*100)}% chance to reduce damage`,
+    apply:v=>{ S.stats.armor=Math.min(.75,S.stats.armor+v); }
+  },
+  {
+    id:'damage', name:'Weapon Damage', group:'offense', base:.18,
+    desc:'Every installed weapon hits harder.',
+    effect:v=>`+${Math.round(v*100)}% weapon damage`,
+    apply:v=>{ S.stats.damage+=v; }
+  },
+  {
+    id:'rate', name:'Fire Rate', group:'offense', base:.15,
+    desc:'Every installed weapon fires more often.',
+    effect:v=>`+${Math.round(v*100)}% fire rate`,
+    apply:v=>{ S.stats.rate+=v; }
+  },
+  {
+    id:'crit', name:'Critical Chance', group:'offense', base:.06,
+    desc:'Some attacks deal double damage.',
+    effect:v=>`+${Math.round(v*100)}% chance to deal double damage`,
+    apply:v=>{ S.stats.crit=Math.min(.70,S.stats.crit+v); }
+  },
+  {
+    id:'projectile', name:'Projectile Speed', group:'offense', base:.15,
+    desc:'Shots reach enemies faster and miss less often.',
+    effect:v=>`+${Math.round(v*100)}% projectile speed`,
+    apply:v=>{ S.stats.projectile+=v; }
+  },
+  {
+    id:'pierce', name:'Piercing Shots', group:'offense', base:1,
+    desc:'Shots continue through additional enemies.',
+    effect:v=>`Shots pass through ${v} extra ${v===1?'enemy':'enemies'}`,
+    apply:v=>{ S.stats.pierce+=v; }
+  },
+  {
+    id:'splash', name:'Blast Radius', group:'offense', base:1,
+    desc:'Explosive weapons damage a wider area.',
+    effect:v=>`+${v} blast radius level${v===1?'':'s'}`,
+    apply:v=>{ S.stats.splash+=v; }
+  },
+  {
+    id:'salvage', name:'Salvage Bonus', group:'utility', base:.20,
+    desc:'Destroyed enemies drop more salvage for route events.',
+    effect:v=>`+${Math.round(v*100)}% salvage earned`,
+    apply:v=>{ S.stats.salvage+=v; }
+  },
+  {
+    id:'xp', name:'Upgrade Progress', group:'utility', base:.15,
+    desc:'Kills fill the upgrade meter faster. Choices still stay spaced out.',
+    effect:v=>`+${Math.round(v*100)}% upgrade progress from kills`,
+    apply:v=>{ S.stats.xp+=v; }
+  },
+  {
+    id:'luck', name:'Rarity Luck', group:'utility', base:.05,
+    desc:'Future choices are more likely to contain higher-rarity upgrades.',
+    effect:v=>`+${Math.round(v*100)}% better high-rarity odds`,
+    apply:v=>{ S.stats.luck=Math.min(.75,S.stats.luck+v); }
+  }
+];
+
+const SPECIALS = [
+  {
+    id:'secondChance', name:'Second Chance', rarity:2,
+    desc:'Survive one fatal hit instead of ending the run.',
+    effect:'Once per run: revive at 40% hull',
+    apply(){ S.specials.secondChance=(S.specials.secondChance||0)+1; }
+  },
+  {
+    id:'glassCannon', name:'Glass Cannon', rarity:2,
+    desc:'Deal much more damage, but permanently lose some hull capacity.',
+    effect:'+60% damage, -3 maximum hull',
+    apply(){ S.stats.damage+=.60; S.maxHull=Math.max(6,S.maxHull-3); S.hull=Math.min(S.hull,S.maxHull); }
+  },
+  {
+    id:'emergency', name:'Emergency Power', rarity:2,
+    desc:'The ship becomes much more dangerous when close to destruction.',
+    effect:'Below 35% hull: +40% damage and fire rate',
+    apply(){ S.specials.emergency=1; }
+  },
+  {
+    id:'combatRepair', name:'Combat Repair', rarity:2,
+    desc:'Destroying enough enemies restores hull automatically.',
+    effect:'Every 15 kills: repair 1 hull',
+    apply(){ S.specials.combatRepair=(S.specials.combatRepair||0)+1; }
+  },
+  {
+    id:'pointDefense', name:'Point Defense', rarity:3,
+    desc:'A defensive gun automatically destroys some incoming shots.',
+    effect:'Destroy every 9th enemy projectile',
+    apply(){ S.specials.pointDefense=(S.specials.pointDefense||0)+1; }
+  },
+  {
+    id:'smartAI', name:'Smart Autopilot', rarity:3,
+    desc:'The autopilot reacts sooner and reaches safe lanes faster.',
+    effect:'+15% dodge reaction, +20% movement speed',
+    apply(){ S.stats.dodge=Math.min(.82,S.stats.dodge+.15); S.stats.speed+=.20; }
+  },
+  {
+    id:'arsenal', name:'Weapon Mastery', rarity:3,
+    desc:'Improve every weapon already installed on the ship.',
+    effect:'+1 level to every installed weapon',
+    apply(){ for(const key of Object.keys(S.weapons)) if(S.weapons[key]) S.weapons[key]=Math.min(15,S.weapons[key]+1); }
+  },
+  {
+    id:'balanced', name:'Perfect Tune-Up', rarity:4,
+    desc:'A major all-round improvement with no downside.',
+    effect:'+30% damage, +25% fire rate, +3 hull, +2 shield',
+    apply(){ S.stats.damage+=.30; S.stats.rate+=.25; S.maxHull+=3; S.hull+=3; S.maxShield+=2; S.shield=S.maxShield; }
+  }
+];
+
+const SYNERGIES = [
+  { id:'regenShield', name:'Self-Recharging Defense', desc:'Strong shields and repair now reinforce each other.', test:s=>s.maxShield>=8&&s.stats.repair>=.05, apply:s=>{s.shieldRegen+=.035;s.stats.repair+=.012;} },
+  { id:'agile', name:'Agile Autopilot', desc:'Fast engines and good dodging make movement much safer.', test:s=>s.stats.dodge>=.32&&s.stats.speed>=1.50, apply:s=>{s.stats.dodge=Math.min(.82,s.stats.dodge+.07);s.stats.speed+=.10;} },
+  { id:'fullAuto', name:'Full Auto', desc:'High damage and fire rate boost one another.', test:s=>s.stats.damage>=1.70&&s.stats.rate>=1.45, apply:s=>{s.stats.damage+=.12;s.stats.rate+=.12;} },
+  { id:'treasure', name:'Treasure Hunter', desc:'Luck and salvage make each kill more valuable.', test:s=>s.stats.luck>=.15&&s.stats.salvage>=1.50, apply:s=>{s.stats.salvage+=.20;s.stats.xp+=.08;} },
+  { id:'blastCrit', name:'Explosive Criticals', desc:'Critical hits can trigger extra blast damage.', test:s=>s.stats.crit>=.18&&s.stats.splash>=2, apply:s=>{s.specials.blastCrit=1;} },
+  { id:'pierceRain', name:'Piercing Barrage', desc:'Fast fire and piercing shots tear through groups.', test:s=>s.stats.pierce>=3&&s.stats.rate>=1.35, apply:s=>{s.stats.pierce+=1;s.stats.rate+=.08;} },
+  { id:'tank', name:'Tank Build', desc:'Large hull and armor create steady self-repair.', test:s=>s.maxHull>=22&&s.stats.armor>=.22, apply:s=>{s.stats.repair+=.018;s.stats.armor=Math.min(.75,s.stats.armor+.04);} },
+  { id:'droneDefense', name:'Escort Screen', desc:'Attack drones help intercept incoming fire.', test:s=>s.weapons.drone>=4&&s.stats.dodge>=.25, apply:s=>{s.specials.droneDefense=1;} },
+  { id:'missileBarrage', name:'Missile Barrage', desc:'Homing missiles launch in pairs.', test:s=>s.weapons.missile>=4&&s.weapons.scatter>=3, apply:s=>{s.specials.missileBarrage=1;} },
+  { id:'beamCannon', name:'Beam Cannon', desc:'Railgun shots gain extra power from the Rapid Laser.', test:s=>s.weapons.laser>=4&&s.weapons.rail>=3, apply:s=>{s.specials.beamCannon=1;} },
+  { id:'chainBombs', name:'Chain Detonations', desc:'Heavy Bombs and Flak can trigger secondary explosions.', test:s=>s.weapons.nova>=4&&s.weapons.flak>=3, apply:s=>{s.specials.chainBombs=1;} }
+];
+
+const stars = Array.from({length:220},()=>({x:rand(0,W),y:rand(0,H),z:rand(.10,1),s:chance(.15)?2:1}));
+let S;
+let raf=0;
+let last=0;
+
+function freshState(){
+  return {
+    phase:'menu',
+    time:0,
+    level:1,
+    xp:0,
+    xpNeed:70,
+    upgradeReady:false,
+    upgradeQueued:false,
+    nextUpgradeRarity:0,
+    lastDecisionAt:0,
+    salvage:0,
+    hull:18,
+    maxHull:18,
+    shield:5,
+    maxShield:5,
+    shieldRegen:.085,
+    shieldDelay:0,
+    threat:.52,
+    grace:12,
+    kills:0,
+    bosses:0,
+    openingPick:0,
+    worldSpeed:1.75,
+    combatSpeed:1.16,
+    stats:{damage:1,rate:1,dodge:.18,speed:1.22,repair:.014,luck:0,armor:.06,crit:.03,xp:1,salvage:1,projectile:1,pierce:0,splash:0},
+    weapons:{pulse:1,scatter:0,missile:0,rail:0,flak:0,arc:0,drone:0,laser:0,nova:0},
+    cooldowns:{},
+    upgrades:{},
+    specials:{},
+    synergies:{},
+    choiceQueue:[],
+    queuedKeys:{},
+    ship:{x:165,y:H/2,targetY:H/2,ai:0,inv:0,tilt:0},
+    enemies:[],
+    bullets:[],
+    shots:[],
+    particles:[],
+    popups:[],
+    banners:[],
+    boss:null,
+    director:{spawn:2.8,wave:12.5,event:135,boss:180,breather:52},
+    combo:0,
+    comboTimer:0,
+    screenShake:0,
+    flash:0,
+    bulletsSeen:0,
+    nextMilestone:60,
+    best:Number(localStorage.getItem('starwardBest')||0)
+  };
+}
+
+const formatTime = (t) => `${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
+const formatRepair = (v) => v<=0 ? 'OFF' : `1 / ${Math.max(1,Math.round(1/v))}s`;
+
+function popup(text,x,y,color='#fff',life=.85){
+  S.popups.push({text,x,y,color,life,max:life});
+}
+function banner(text,color='#fff',sub=''){
+  S.banners.push({text,color,sub,life:2.6,max:2.6});
+}
+function burst(x,y,color,n=12,speed=180,size=3){
+  for(let i=0;i<n;i++){
+    const angle=rand(0,Math.PI*2);
+    const velocity=rand(speed*.25,speed);
+    S.particles.push({x,y,vx:Math.cos(angle)*velocity,vy:Math.sin(angle)*velocity,life:rand(.25,.7),max:.7,color,size:chance(.25)?size*2:size});
+  }
+}
+
+function rollRarity(minIndex=0){
+  const weights=RARITIES.map((rarity,index)=>{
+    if(index<minIndex) return 0;
+    return rarity.weight*(index===0?1:1+S.stats.luck*index*1.25);
+  });
+  let total=weights.reduce((a,b)=>a+b,0);
+  let roll=Math.random()*total;
+  for(let i=0;i<RARITIES.length;i++){
+    roll-=weights[i];
+    if(roll<=0) return RARITIES[i];
+  }
+  return RARITIES[minIndex];
+}
+
+function weaponCard(minRarity=0){
+  const key=pick(Object.keys(WEAPONS));
+  const weapon=WEAPONS[key];
+  const rarity=rollRarity(minRarity);
+  const current=S.weapons[key];
+  const gain=Math.max(1,Math.round(rarity.power*.70));
+  const next=Math.min(15,current+gain);
+  return {
+    rarity,
+    title:current?`Upgrade ${weapon.name}`:`Unlock ${weapon.name}`,
+    desc:current?`${weapon.name} is currently level ${current}.`:`Adds ${weapon.name} to the ship's automatic weapons.`,
+    effect:current?`Level ${current} → ${next}`:`Install at level ${gain}`,
+    apply(){ S.weapons[key]=next; }
+  };
+}
+
+function statCard(group=null,minRarity=0){
+  const pool=group?STAT_UPGRADES.filter(item=>item.group===group):STAT_UPGRADES;
+  const item=pick(pool);
+  const rarity=rollRarity(minRarity);
+  let amount=item.base*rarity.power*rand(.92,1.08);
+  if(['hull','shield','pierce','splash'].includes(item.id)) amount=Math.max(1,Math.round(amount));
+  return {
+    rarity,
+    title:item.name,
+    desc:item.desc,
+    effect:item.effect(amount),
+    apply(){ item.apply(amount); }
+  };
+}
+
+function specialCard(minRarity=2){
+  const available=SPECIALS.filter(item=>item.rarity>=minRarity&&!S.upgrades[`special:${item.id}`]);
+  if(!available.length) return statCard(null,minRarity);
+  const item=pick(available);
+  const rarity=RARITIES[Math.max(minRarity,item.rarity)];
+  return {
+    rarity,
+    title:item.name,
+    desc:item.desc,
+    effect:item.effect,
+    apply(){ item.apply(); S.upgrades[`special:${item.id}`]=1; }
+  };
+}
+
+function makeDraft(spec=['random','random','random'],minRarity=0){
+  return spec.map(kind=>{
+    if(kind==='weapon') return weaponCard(minRarity);
+    if(['survival','offense','utility'].includes(kind)) return statCard(kind,minRarity);
+    if(kind==='special') return specialCard(Math.max(2,minRarity));
+    if(chance(.30)) return weaponCard(minRarity);
+    if(chance(.08+S.stats.luck*.12)) return specialCard(Math.max(2,minRarity));
+    return statCard(null,minRarity);
+  });
+}
+
+function updateUI(){
+  ui.time.textContent=formatTime(S.time);
+  ui.hull.textContent=`${Math.max(0,Math.ceil(S.hull))}/${S.maxHull}`;
+  ui.shield.textContent=`${Math.max(0,Math.floor(S.shield))}/${S.maxShield}`;
+  ui.level.textContent=S.level;
+  ui.salvage.textContent=Math.floor(S.salvage);
+  ui.damage.textContent=`${Math.round(S.stats.damage*100)}%`;
+  ui.rate.textContent=`${Math.round(S.stats.rate*100)}%`;
+  ui.dodge.textContent=`${Math.round(S.stats.dodge*100)}%`;
+  ui.thrust.textContent=`${Math.round(S.stats.speed*100)}%`;
+  ui.repair.textContent=formatRepair(S.stats.repair);
+  ui.luck.textContent=`${Math.round(S.stats.luck*100)}%`;
+
+  if(S.upgradeReady){
+    const wait=Math.max(0,NORMAL_CHOICE_GAP-(S.time-S.lastDecisionAt));
+    ui.xp.textContent=wait>0?`NEXT CHOICE IN ${Math.ceil(wait)}s`:'UPGRADE READY';
+  }else{
+    ui.xp.textContent=`${Math.floor(S.xp)} / ${S.xpNeed}`;
+  }
+  ui.xpBar.style.width=`${clamp(S.xp/S.xpNeed*100,0,100)}%`;
+
+  const chips=[];
+  for(const [key,level] of Object.entries(S.weapons)){
+    if(level>0) chips.push(`<span class="weapon-chip">${WEAPONS[key].icon} ${WEAPONS[key].name} Lv.${level}</span>`);
+  }
+  for(const synergy of SYNERGIES){
+    if(S.synergies[synergy.id]) chips.push(`<span class="synergy-chip">★ ${synergy.name}</span>`);
+  }
+  for(const special of SPECIALS){
+    if(S.upgrades[`special:${special.id}`]) chips.push(`<span class="special-chip">◆ ${special.name}</span>`);
+  }
+  ui.chips.innerHTML=chips.join('')||'<span class="weapon-chip">• Pulse Cannon Lv.1</span>';
+}
+
+function hideOverlay(){
+  overlay.classList.add('hidden');
+  choiceGrid.classList.add('hidden');
+}
+
+function showChoices({type,heading,body,cards,progress='',onPick}){
+  S.phase='choice';
+  eyebrow.textContent=type;
+  overlayTitle.textContent=heading;
+  overlayText.innerHTML=`${progress?`<div class="draft-progress">${progress}</div>`:''}${body}`;
+  choiceGrid.innerHTML='';
+  choiceGrid.classList.remove('hidden');
+  startBtn.classList.add('hidden');
+  overlay.classList.remove('hidden');
+
+  cards.forEach(card=>{
+    const button=document.createElement('button');
+    button.className=`choice-card r-${card.rarity.cls}`;
+    button.innerHTML=`<span class="rarity">${card.rarity.name.toUpperCase()}</span><h3>${card.title}</h3><p>${card.desc}</p><span class="effect">${card.effect}</span>`;
+    button.addEventListener('click',()=>{
+      card.apply();
+      checkSynergies();
+      updateUI();
+      hideOverlay();
+      onPick();
+    },{once:true});
+    choiceGrid.appendChild(button);
+  });
+}
+
+function showOpeningChoice(){
+  const index=S.openingPick;
+  const specs=[
+    ['weapon','survival','offense'],
+    ['survival','weapon','utility'],
+    ['offense','survival','weapon'],
+    ['survival','offense','random'],
+    ['weapon','special','survival']
+  ];
+  showChoices({
+    type:'PRE-FLIGHT',
+    heading:'Build your ship',
+    body:'Pick one upgrade. The run starts after five choices.',
+    cards:makeDraft(specs[index],index===4?1:0),
+    progress:`STARTING CHOICE ${index+1} OF 5`,
+    onPick(){
+      S.openingPick++;
+      if(S.openingPick<5) setTimeout(showOpeningChoice,50);
+      else beginRun();
+    }
+  });
+}
+
+function startRun(){
+  cancelAnimationFrame(raf);
+  S=freshState();
+  updateUI();
+  showOpeningChoice();
+}
+
+function beginRun(){
+  hideOverlay();
+  S.phase='running';
+  S.grace=12;
+  S.lastDecisionAt=0;
+  last=performance.now();
+  banner('SHIP ONLINE','#8ff7ff','Autopilot engaged');
+  raf=requestAnimationFrame(loop);
+}
+
+function queueChoice(key,fn,delay=0){
+  if(S.queuedKeys[key]) return;
+  S.queuedKeys[key]=1;
+  S.choiceQueue.push({key,fn,readyAt:S.time+delay});
+}
+
+function resumeRun(){
+  S.lastDecisionAt=S.time;
+  S.phase='running';
+  hideOverlay();
+}
+
+function showNormalUpgrade(){
+  S.upgradeQueued=false;
+  S.level++;
+  S.xp=Math.max(0,S.xp-S.xpNeed);
+  S.xpNeed=Math.round(S.xpNeed*1.16+10);
+  S.upgradeReady=S.xp>=S.xpNeed;
+  const minRarity=S.nextUpgradeRarity;
+  S.nextUpgradeRarity=0;
+  showChoices({
+    type:'UPGRADE',
+    heading:'Choose one upgrade',
+    body:'Make one clear improvement, then let the ship run again.',
+    cards:makeDraft(['random','survival','random'],minRarity),
+    onPick:resumeRun
+  });
+}
+
+function showBossReward(){
+  showChoices({
+    type:'BOSS REWARD',
+    heading:'Choose a boss reward',
+    body:'A rare reward for surviving the dreadnought.',
+    cards:makeDraft(['weapon','special','random'],1),
+    onPick:resumeRun
+  });
+}
+
+function gainXP(amount){
+  S.xp+=amount*S.stats.xp;
+  if(S.xp>=S.xpNeed) S.upgradeReady=true;
+}
+
+function checkNormalUpgrade(){
+  if(!S.upgradeReady||S.upgradeQueued||S.phase!=='running') return;
+  if(S.time-S.lastDecisionAt<NORMAL_CHOICE_GAP) return;
+  S.upgradeQueued=true;
+  queueChoice('normal-upgrade',()=>{
+    delete S.queuedKeys['normal-upgrade'];
+    showNormalUpgrade();
+  });
+}
+
+function processChoiceQueue(){
+  if(S.phase!=='running'||!S.choiceQueue.length) return;
+  const next=S.choiceQueue[0];
+  if(S.time<next.readyAt) return;
+  if(S.time-S.lastDecisionAt<QUEUED_CHOICE_GAP) return;
+  S.choiceQueue.shift();
+  delete S.queuedKeys[next.key];
+  next.fn();
+}
+
+function checkSynergies(){
+  for(const synergy of SYNERGIES){
+    if(S.synergies[synergy.id]||!synergy.test(S)) continue;
+    S.synergies[synergy.id]=1;
+    synergy.apply(S);
+    banner(`BUILD BONUS: ${synergy.name}`,'#ffe56b',synergy.desc);
+    burst(S.ship.x,S.ship.y,'#ffe56b',30,240,3);
+  }
+}
+
+function spawnEnemy(type,y=rand(65,H-65),elite=false){
+  const data=ENEMIES[type];
+  const scale=1+S.time/290;
+  S.enemies.push({
+    type,x:W+45,y,baseY:y,
+    hp:data.hp*scale*(elite?2:1),maxHp:data.hp*scale*(elite?2:1),
+    speed:data.speed,fire:rand(.7,Math.max(.9,data.fire)),elite,size:data.size,color:data.color,t:0,charge:0
+  });
+}
+
+function spawnWave(){
+  const pool=['scout','dart','gunner'];
+  if(S.time>45) pool.push('swarm','weaver');
+  if(S.time>95) pool.push('sniper','bomber','charger');
+  if(S.time>165) pool.push('guardian','splitter','tank','healer');
+  const count=Math.min(9,3+Math.floor(S.time/80));
+  const pattern=pick(['line','sine','cluster']);
+  for(let i=0;i<count;i++){
+    const y=pattern==='line'
+      ? 80+i*(H-160)/Math.max(1,count-1)
+      : pattern==='sine'
+        ? H/2+Math.sin(i*1.15)*155
+        : rand(100,H-100);
+    spawnEnemy(pick(pool),y,chance(.03+S.time/7500));
+  }
+}
+
+function nearestTarget(){
+  let best=S.boss||null;
+  let x=best?best.x:Infinity;
+  for(const enemy of S.enemies){
+    if(enemy.hp>0&&enemy.x<x){best=enemy;x=enemy.x;}
+  }
+  return best;
+}
+
+function damageMultiplier(){
+  return S.stats.damage*(S.specials.emergency&&S.hull/S.maxHull<.35?1.4:1);
+}
+function rateMultiplier(){
+  return S.stats.rate*(S.specials.emergency&&S.hull/S.maxHull<.35?1.4:1);
+}
+
+function updateWeapons(dt){
+  for(const key of Object.keys(WEAPONS)) S.cooldowns[key]=Math.max(0,(S.cooldowns[key]||0)-dt);
+  const target=nearestTarget();
+  if(!target) return;
+
+  for(const [key,level] of Object.entries(S.weapons)){
+    if(level<=0||S.cooldowns[key]>0) continue;
+    const weapon=WEAPONS[key];
+    S.cooldowns[key]=weapon.cool/(rateMultiplier()*Math.sqrt(level));
+    let count=key==='scatter'?Math.min(9,2+level):key==='drone'?Math.min(5,level):1;
+    if(key==='missile'&&S.specials.missileBarrage) count=2;
+
+    for(let i=0;i<count;i++){
+      const base=Math.atan2(target.y-S.ship.y,target.x-S.ship.x);
+      const angle=base+(i-(count-1)/2)*(key==='scatter'?.105:.035);
+      const speed=(weapon.speed+level*40)*S.stats.projectile;
+      const crit=chance(S.stats.crit);
+      S.shots.push({
+        kind:key,x:S.ship.x+24,y:S.ship.y,
+        vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,
+        damage:(weapon.damage+level*1.35)*damageMultiplier()*(crit?2:1),
+        life:3.2,color:weapon.color,
+        pierce:S.stats.pierce+(key==='rail'?2:0),
+        splash:S.stats.splash+((key==='flak'||key==='nova')?1+level*.2:0),
+        homing:key==='missile',crit,trail:[]
+      });
+    }
+  }
+}
+
+function hurtShip(amount){
+  if(S.ship.inv>0||S.phase!=='running') return;
+  if(S.specials.pointDefense&&++S.bulletsSeen%9===0) return;
+  let damage=amount;
+  if(S.shield>0){
+    const absorbed=Math.min(S.shield,damage);
+    S.shield-=absorbed;
+    damage-=absorbed;
+  }
+  if(damage>0&&chance(S.stats.armor)) damage=Math.max(0,damage-1);
+  if(damage>0){
+    S.hull-=damage;
+    S.screenShake=Math.max(S.screenShake,5);
+    S.flash=.12;
+    popup(`-${damage}`,S.ship.x,S.ship.y-24,'#ff8095');
+  }
+  S.ship.inv=.55;
+  S.shieldDelay=4;
+
+  if(S.hull<=0){
+    if(S.specials.secondChance){
+      S.specials.secondChance--;
+      S.hull=Math.max(1,S.maxHull*.4);
+      S.shield=S.maxShield;
+      S.ship.inv=2;
+      banner('SECOND CHANCE','#ffe56b','Back in the fight');
+    }else{
+      endRun();
+    }
+  }
+}
+
+function killEnemy(enemy){
+  const data=ENEMIES[enemy.type];
+  S.salvage+=data.salvage*S.stats.salvage;
+  S.kills++;
+  S.combo++;
+  S.comboTimer=2;
+  gainXP(data.xp);
+  burst(enemy.x,enemy.y,enemy.color,enemy.elite?26:14,enemy.elite?270:190,enemy.elite?4:3);
+  S.screenShake=Math.max(S.screenShake,enemy.elite?3:1.4);
+
+  if(S.specials.combatRepair&&S.kills%15===0){
+    S.hull=Math.min(S.maxHull,S.hull+1);
+    popup('+1 HULL',S.ship.x,S.ship.y-28,'#8fffb2',1.1);
+  }
+
+  if(enemy.type==='splitter'){
+    spawnEnemy('swarm',enemy.y-18);
+    spawnEnemy('swarm',enemy.y+18);
+    const a=S.enemies[S.enemies.length-1];
+    const b=S.enemies[S.enemies.length-2];
+    if(a) a.x=enemy.x;
+    if(b) b.x=enemy.x;
+  }
+}
+
+function updateAutopilot(dt){
+  S.ship.ai-=dt;
+  if(S.ship.ai<=0){
+    S.ship.ai=Math.max(.04,.19*(1-S.stats.dodge));
+    let bestY=H/2;
+    let bestRisk=Infinity;
+    for(let y=58;y<H-48;y+=28){
+      let risk=Math.abs(y-H/2)*.0013;
+      for(const bullet of S.bullets){
+        const dx=bullet.x-S.ship.x;
+        if(dx>-25&&dx<410) risk+=Math.max(0,9-Math.abs(y-bullet.y)/10)*(1+S.stats.dodge*2.2);
+      }
+      for(const enemy of S.enemies){
+        const dx=enemy.x-S.ship.x;
+        if(dx>0&&dx<220) risk+=Math.max(0,8-Math.abs(y-enemy.y)/13);
+      }
+      if(risk<bestRisk){bestRisk=risk;bestY=y;}
+    }
+    S.ship.targetY=bestY;
+  }
+
+  const oldY=S.ship.y;
+  const maxMove=325*S.stats.speed*dt;
+  S.ship.y+=clamp(S.ship.targetY-S.ship.y,-maxMove,maxMove);
+  S.ship.y=clamp(S.ship.y,42,H-38);
+  S.ship.tilt=(S.ship.y-oldY)*.12;
+  S.ship.inv=Math.max(0,S.ship.inv-dt);
+}
+
+function fireEnemy(enemy){
+  const data=ENEMIES[enemy.type];
+  const angle=Math.atan2(S.ship.y-enemy.y,S.ship.x-enemy.x);
+  const speed=(enemy.type==='sniper'?320:190+S.time*.075)*S.combatSpeed;
+  const spread=enemy.type==='bomber'?[-.17,0,.17]:enemy.type==='weaver'?[-.1,.1]:[0];
+  for(const offset of spread){
+    S.bullets.push({
+      x:enemy.x,y:enemy.y,
+      vx:Math.cos(angle+offset)*speed,vy:Math.sin(angle+offset)*speed,
+      damage:data.damage,life:5.5,hot:enemy.type==='sniper'
+    });
+  }
+}
+
+function updateEnemies(dt){
+  for(const enemy of S.enemies){
+    const data=ENEMIES[enemy.type];
+    enemy.t+=dt;
+    let movement=data.speed*S.combatSpeed*dt*(.80+S.threat*.08);
+    if(enemy.type==='charger'&&enemy.x<700){
+      if(!enemy.charge) enemy.charge=.8;
+      enemy.charge-=dt;
+      if(enemy.charge<0) movement*=3.2;
+    }
+    enemy.x-=movement;
+    if(enemy.type==='dart') enemy.y=enemy.baseY+Math.sin(enemy.t*5)*85;
+    if(enemy.type==='swarm') enemy.y=enemy.baseY+Math.sin(enemy.t*6+enemy.x*.02)*48;
+    if(enemy.type==='bomber') enemy.y=enemy.baseY+Math.sin(enemy.t*1.7)*60;
+    if(enemy.type==='weaver') enemy.y=enemy.baseY+Math.sin(enemy.t*3.2)*105;
+    if(enemy.type==='healer'){
+      const ally=S.enemies.find(other=>other!==enemy&&other.hp>0&&other.hp<other.maxHp);
+      if(ally) ally.hp=Math.min(ally.maxHp,ally.hp+3*dt);
+    }
+    enemy.fire-=dt;
+    if(enemy.fire<=0&&enemy.x<W-45&&data.fire<90&&S.grace<=0){
+      enemy.fire=data.fire*rand(.95,1.30)/Math.sqrt(S.threat);
+      fireEnemy(enemy);
+    }
+    if(Math.hypot(enemy.x-S.ship.x,enemy.y-S.ship.y)<enemy.size+13){
+      enemy.hp=0;
+      hurtShip(data.damage);
+    }
+  }
+}
+
+function updateProjectiles(dt){
+  for(const bullet of S.bullets){
+    bullet.x+=bullet.vx*dt;
+    bullet.y+=bullet.vy*dt;
+    bullet.life-=dt;
+    if(S.specials.droneDefense&&Math.hypot(bullet.x-S.ship.x,bullet.y-S.ship.y)<70&&chance(.04)){
+      bullet.life=0;
+      burst(bullet.x,bullet.y,'#7fffc5',4,80,2);
+    }
+    if(Math.hypot(bullet.x-S.ship.x,bullet.y-S.ship.y)<14){
+      bullet.life=0;
+      hurtShip(bullet.damage);
+    }
+  }
+
+  for(const shot of S.shots){
+    shot.trail.push({x:shot.x,y:shot.y});
+    if(shot.trail.length>6) shot.trail.shift();
+    if(shot.homing){
+      const target=nearestTarget();
+      if(target){
+        const desired=Math.atan2(target.y-shot.y,target.x-shot.x);
+        const speed=Math.hypot(shot.vx,shot.vy);
+        const current=Math.atan2(shot.vy,shot.vx);
+        const diff=((desired-current+Math.PI*3)%(Math.PI*2))-Math.PI;
+        const angle=current+clamp(diff,-4.2*dt,4.2*dt);
+        shot.vx=Math.cos(angle)*speed;
+        shot.vy=Math.sin(angle)*speed;
+      }
+    }
+    shot.x+=shot.vx*dt;
+    shot.y+=shot.vy*dt;
+    shot.life-=dt;
+
+    for(const enemy of S.enemies){
+      if(enemy.hp<=0) continue;
+      if(Math.hypot(shot.x-enemy.x,shot.y-enemy.y)>=enemy.size+5) continue;
+      enemy.hp-=shot.damage;
+
+      if(shot.crit&&S.specials.blastCrit){
+        for(const other of S.enemies){
+          if(other!==enemy&&Math.hypot(other.x-enemy.x,other.y-enemy.y)<80) other.hp-=shot.damage*.35;
+        }
+      }
+      if(shot.splash){
+        const radius=45+shot.splash*17;
+        for(const other of S.enemies){
+          if(other!==enemy&&other.hp>0&&Math.hypot(other.x-enemy.x,other.y-enemy.y)<radius) other.hp-=shot.damage*.32;
+        }
+      }
+      if(shot.kind==='arc'){
+        const other=S.enemies.find(o=>o!==enemy&&o.hp>0&&Math.hypot(o.x-enemy.x,o.y-enemy.y)<120);
+        if(other) other.hp-=shot.damage*.60;
+      }
+      if(shot.kind==='rail'&&S.specials.beamCannon) enemy.hp-=shot.damage*.35;
+      if((shot.kind==='nova'||shot.kind==='flak')&&S.specials.chainBombs&&chance(.25)){
+        for(const other of S.enemies){
+          if(other!==enemy&&Math.hypot(other.x-enemy.x,other.y-enemy.y)<110) other.hp-=shot.damage*.25;
+        }
+      }
+      if(shot.pierce>0) shot.pierce--;
+      else shot.life=0;
+      break;
+    }
+
+    if(S.boss&&Math.hypot(shot.x-S.boss.x,shot.y-S.boss.y)<S.boss.size){
+      S.boss.hp-=shot.damage;
+      if(shot.pierce<=0) shot.life=0;
+    }
+  }
+}
+
+function spawnBoss(){
+  const type=BOSSES[S.bosses%BOSSES.length];
+  const hp=235*(1+S.bosses*.55);
+  S.boss={type,x:W+90,y:H/2,hp,maxHp:hp,size:64,fire:1.45,t:0,phase:1};
+  banner('DREADNOUGHT INCOMING',type.color,type.name);
+  S.screenShake=5;
+}
+
+function updateBoss(dt){
+  if(!S.boss) return;
+  const boss=S.boss;
+  boss.t+=dt;
+  boss.x+=(W-170-boss.x)*dt*.38;
+  boss.y=H/2+Math.sin(boss.t*(1.2+boss.phase*.15))*135;
+  boss.phase=boss.hp/boss.maxHp<.33?3:boss.hp/boss.maxHp<.66?2:1;
+  boss.fire-=dt;
+
+  if(boss.fire<=0&&S.grace<=0){
+    boss.fire=Math.max(.46,1.36-boss.phase*.13-S.bosses*.035);
+    const base=Math.atan2(S.ship.y-boss.y,S.ship.x-boss.x);
+    const count=3+boss.phase*2;
+    for(let i=0;i<count;i++){
+      const offset=(i-(count-1)/2)*(.09+boss.phase*.018);
+      const speed=(205+boss.phase*24)*S.combatSpeed;
+      S.bullets.push({
+        x:boss.x,y:boss.y,
+        vx:Math.cos(base+offset)*speed,vy:Math.sin(base+offset)*speed,
+        damage:boss.phase===3?2:1,life:7
+      });
+    }
+  }
+
+  if(boss.hp<=0){
+    const name=boss.type.name;
+    burst(boss.x,boss.y,boss.type.color,75,380,5);
+    S.screenShake=12;
+    S.boss=null;
+    S.bosses++;
+    S.salvage+=20;
+    S.hull=Math.min(S.maxHull,S.hull+Math.max(3,S.maxHull*.22));
+    S.shield=S.maxShield;
+    gainXP(20);
+    banner(`${name} DESTROYED`,'#ffe56b','Boss reward incoming');
+    queueChoice(`boss-reward-${S.bosses}`,showBossReward,4);
+  }
+}
+
+function showRouteEvent(){
+  const economyCard=S.salvage>=12
+    ? {
+        rarity:RARITIES[1],
+        title:'Weapon Workshop',
+        desc:'Spend salvage to improve weapons without opening another menu.',
+        effect:'Spend 12 salvage → +2 levels to installed weapons',
+        apply(){
+          S.salvage-=12;
+          const installed=Object.keys(S.weapons).filter(key=>S.weapons[key]>0);
+          for(let i=0;i<2;i++){
+            const key=pick(installed);
+            S.weapons[key]=Math.min(15,S.weapons[key]+1);
+          }
+          banner('WEAPONS IMPROVED','#8fffb2','Workshop complete');
+        }
+      }
+    : {
+        rarity:RARITIES[1],
+        title:'Scavenge the Wreck',
+        desc:'You do not have enough salvage for the workshop yet.',
+        effect:'+8 salvage',
+        apply(){S.salvage+=8;}
+      };
+
+  const cards=[
+    {
+      rarity:RARITIES[0],
+      title:'Repair Stop',
+      desc:'Take a safe maintenance stop before continuing.',
+      effect:'Heal 45% hull and fully recharge shields',
+      apply(){S.hull=Math.min(S.maxHull,S.hull+S.maxHull*.45);S.shield=S.maxShield;}
+    },
+    economyCard,
+    {
+      rarity:RARITIES[2],
+      title:'Take the Risky Route',
+      desc:'Face slightly more pressure for a better future upgrade.',
+      effect:'+10% threat, +8 salvage, next upgrade is Legendary or better',
+      apply(){
+        S.threat+=.10;
+        S.salvage+=8;
+        S.nextUpgradeRarity=Math.max(S.nextUpgradeRarity,2);
+      }
+    }
+  ];
+
+  showChoices({
+    type:'ROUTE EVENT',
+    heading:'Choose the next route',
+    body:'One decision, then the run continues automatically.',
+    cards,
+    onPick:resumeRun
+  });
+}
+
+function pressureFactor(){
+  const health=S.hull/S.maxHull;
+  if(health<.25) return .48;
+  if(health<.45) return .66;
+  if(health<.65) return .84;
+  if(health>.88&&S.shield>S.maxShield*.55) return 1.10;
+  return 1;
+}
+
+function updateDirector(dt){
+  if(S.grace>0){
+    S.grace-=dt;
+    return;
+  }
+
+  const pressure=pressureFactor();
+  S.director.spawn-=dt;
+  S.director.wave-=dt;
+  S.director.event-=dt;
+  S.director.boss-=dt;
+  S.director.breather-=dt;
+
+  if(S.director.spawn<=0){
+    const pool=S.time<55
+      ? ['scout','dart']
+      : S.time<115
+        ? ['scout','dart','gunner','weaver']
+        : ['scout','dart','gunner','weaver','sniper','charger'];
+    spawnEnemy(pick(pool));
+    S.director.spawn=rand(1.9,2.9)/(S.threat*pressure);
+  }
+
+  if(S.director.wave<=0){
+    spawnWave();
+    S.director.wave=rand(9.5,13.5)/Math.sqrt(S.threat*pressure);
+  }
+
+  if(S.director.event<=0){
+    if(S.time-S.lastDecisionAt>=55){
+      queueChoice(`event-${Math.floor(S.time)}`,showRouteEvent,0);
+      S.director.event=rand(125,155);
+    }else{
+      S.director.event=18;
+    }
+  }
+
+  if(S.director.boss<=0&&!S.boss){
+    S.director.boss=rand(180,220);
+    spawnBoss();
+  }
+
+  if(S.director.breather<=0){
+    S.grace=Math.max(S.grace,5);
+    S.director.breather=rand(52,68);
+    banner('CLEAR AIR','#8ff7ff','A few seconds to recover');
+  }
+}
+
+function checkMilestones(){
+  if(S.time<S.nextMilestone) return;
+  const minutes=Math.floor(S.nextMilestone/60);
+  banner(`${minutes} MINUTE${minutes===1?'':'S'} SURVIVED`,'#ffe56b',minutes%2===0?'Rarity luck increased':'The build keeps growing');
+  if(minutes%2===0) S.stats.luck=Math.min(.75,S.stats.luck+.02);
+  S.nextMilestone+=60;
+}
+
+function update(dt){
+  S.time+=dt;
+  S.worldSpeed=1.75+Math.min(.65,S.time/720);
+  S.combatSpeed=1.16+Math.min(.22,S.time/1200);
+  S.threat=.50+Math.min(2.55,S.time/185);
+  S.hull=Math.min(S.maxHull,S.hull+S.stats.repair*dt);
+
+  if(S.shieldDelay>0) S.shieldDelay-=dt;
+  else S.shield=Math.min(S.maxShield,S.shield+S.shieldRegen*dt);
+
+  if(S.comboTimer>0){
+    S.comboTimer-=dt;
+    if(S.comboTimer<=0) S.combo=0;
+  }
+
+  S.screenShake=Math.max(0,S.screenShake-dt*18);
+  S.flash=Math.max(0,S.flash-dt);
+
+  updateAutopilot(dt);
+  updateWeapons(dt);
+  updateDirector(dt);
+  updateEnemies(dt);
+  updateProjectiles(dt);
+  updateBoss(dt);
+  checkMilestones();
+  checkNormalUpgrade();
+
+  for(const enemy of S.enemies){
+    if(enemy.hp<=0&&!enemy.dead){
+      enemy.dead=true;
+      killEnemy(enemy);
+    }
+  }
+
+  S.enemies=S.enemies.filter(enemy=>!enemy.dead&&enemy.x>-80);
+  S.bullets=S.bullets.filter(b=>b.life>0&&b.x>-80&&b.x<W+80&&b.y>-70&&b.y<H+70);
+  S.shots=S.shots.filter(s=>s.life>0&&s.x<W+100&&s.y>-80&&s.y<H+80);
+
+  for(const particle of S.particles){
+    particle.x+=particle.vx*dt;
+    particle.y+=particle.vy*dt;
+    particle.vx*=.98;
+    particle.vy*=.98;
+    particle.life-=dt;
+  }
+  S.particles=S.particles.filter(p=>p.life>0);
+
+  for(const item of S.popups){item.y-=26*dt;item.life-=dt;}
+  S.popups=S.popups.filter(p=>p.life>0);
+  for(const item of S.banners) item.life-=dt;
+  S.banners=S.banners.filter(b=>b.life>0);
+
+  updateUI();
+  processChoiceQueue();
+}
+
+function drawEnemy(enemy){
+  ctx.save();
+  ctx.translate(enemy.x,enemy.y);
+  ctx.fillStyle=enemy.color;
+  ctx.shadowColor=enemy.color;
+  ctx.shadowBlur=enemy.elite?14:5;
+
+  if(enemy.type==='tank'){
+    ctx.fillRect(-enemy.size,-12,enemy.size*2,24);
+    ctx.fillRect(-8,-20,18,40);
+  }else if(enemy.type==='swarm'){
+    ctx.beginPath();
+    ctx.moveTo(13,0);ctx.lineTo(-10,-8);ctx.lineTo(-5,0);ctx.lineTo(-10,8);ctx.closePath();ctx.fill();
+  }else if(enemy.type==='guardian'){
+    ctx.beginPath();ctx.arc(0,0,enemy.size,0,Math.PI*2);ctx.strokeStyle=enemy.color;ctx.lineWidth=4;ctx.stroke();ctx.fillRect(-9,-9,18,18);
+  }else if(enemy.type==='healer'){
+    ctx.fillRect(-5,-20,10,40);ctx.fillRect(-20,-5,40,10);
+  }else{
+    ctx.beginPath();ctx.moveTo(-enemy.size,0);ctx.lineTo(0,-enemy.size*.7);ctx.lineTo(enemy.size,0);ctx.lineTo(0,enemy.size*.7);ctx.closePath();ctx.fill();
+  }
+
+  ctx.shadowBlur=0;
+  if(enemy.elite){
+    ctx.strokeStyle='#ffe56b';ctx.lineWidth=2;ctx.strokeRect(-enemy.size-4,-enemy.size*.75,enemy.size*2+8,enemy.size*1.5);
+  }
+  ctx.restore();
+}
+
+function draw(){
+  const biome=BIOMES[Math.floor(S.time/60)%BIOMES.length];
+  ctx.save();
+  if(S.screenShake) ctx.translate(rand(-S.screenShake,S.screenShake),rand(-S.screenShake,S.screenShake));
+
+  const gradient=ctx.createLinearGradient(0,0,0,H);
+  gradient.addColorStop(0,biome.top);
+  gradient.addColorStop(1,biome.bottom);
+  ctx.fillStyle=gradient;
+  ctx.fillRect(-20,-20,W+40,H+40);
+
+  ctx.fillStyle=biome.fog;
+  for(let i=0;i<6;i++){
+    const x=(W+260)-(S.time*(25+i*6)*S.worldSpeed+i*190)%(W+520)-210;
+    const y=70+i*82;
+    ctx.beginPath();ctx.arc(x,y,105+i*17,0,Math.PI*2);ctx.fill();
+  }
+
+  for(const star of stars){
+    star.x-=star.z*4.4*S.worldSpeed;
+    if(star.x<0) star.x=W;
+    ctx.fillStyle=`rgba(255,255,255,${.18+star.z*.68})`;
+    ctx.fillRect(star.x,star.y,star.s,star.s);
+  }
+
+  for(let i=0;i<9;i++){
+    const x=W-((S.time*110*S.worldSpeed+i*145)%(W+240));
+    ctx.fillStyle=`rgba(255,255,255,${.035+i*.005})`;
+    ctx.fillRect(x,45+(i*59)%450,85+i*7,1);
+  }
+
+  ctx.fillStyle='#02061155';ctx.fillRect(0,0,W,31);
+  ctx.fillStyle=biome.accent;ctx.font='bold 12px monospace';
+  ctx.fillText(`${biome.name}  •  SPEED ${S.worldSpeed.toFixed(1)}×  •  THREAT ${S.threat.toFixed(1)}×${S.grace>0?`  •  SAFE ${Math.ceil(S.grace)}s`:''}`,15,20);
+
+  ctx.save();
+  ctx.translate(S.ship.x,S.ship.y);
+  ctx.rotate(S.ship.tilt*.02);
+  ctx.shadowColor='#76e8f1';ctx.shadowBlur=14;
+  ctx.fillStyle=S.ship.inv>0?'#ffffff':'#75e8f2';
+  ctx.beginPath();
+  ctx.moveTo(30,0);ctx.lineTo(-12,-10);ctx.lineTo(-24,-24);ctx.lineTo(-15,-4);ctx.lineTo(-26,0);ctx.lineTo(-15,4);ctx.lineTo(-24,24);ctx.lineTo(-12,10);ctx.closePath();ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#c8ffff';ctx.fillRect(6,-4,11,8);
+  ctx.fillStyle='#ffd76e';
+  const exhaust=16+S.worldSpeed*6+rand(0,8);
+  ctx.fillRect(-30-exhaust+12,-4,exhaust,8);
+
+  if(S.maxShield>0&&S.shield>0){
+    ctx.strokeStyle=`rgba(125,225,255,${.20+.38*S.shield/S.maxShield})`;
+    ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,32,0,Math.PI*2);ctx.stroke();
+  }
+
+  if(S.weapons.drone>0){
+    const count=Math.min(3,S.weapons.drone);
+    for(let i=0;i<count;i++){
+      const a=S.time*2.4+i*Math.PI*2/count;
+      ctx.fillStyle='#7fffc5';
+      ctx.fillRect(Math.cos(a)*42-3,Math.sin(a)*25-3,6,6);
+    }
+  }
+  ctx.restore();
+
+  for(const enemy of S.enemies) drawEnemy(enemy);
+
+  for(const shot of S.shots){
+    ctx.globalAlpha=.28;
+    for(const trail of shot.trail){ctx.fillStyle=shot.color;ctx.fillRect(trail.x-4,trail.y-1,8,2);}
+    ctx.globalAlpha=1;
+    ctx.shadowColor=shot.color;ctx.shadowBlur=9;ctx.fillStyle=shot.color;
+    if(shot.kind==='missile'||shot.kind==='nova'){
+      ctx.beginPath();ctx.arc(shot.x,shot.y,shot.kind==='nova'?6:4,0,Math.PI*2);ctx.fill();
+    }else{
+      ctx.fillRect(shot.x-6,shot.y-2,12,4);
+    }
+    ctx.shadowBlur=0;
+  }
+
+  for(const bullet of S.bullets){
+    ctx.shadowColor=bullet.hot?'#ffffff':'#ff7890';ctx.shadowBlur=bullet.hot?12:6;
+    ctx.fillStyle=bullet.hot?'#fff1b0':'#ff7890';ctx.beginPath();ctx.arc(bullet.x,bullet.y,bullet.hot?5:4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  }
+
+  for(const particle of S.particles){
+    ctx.globalAlpha=Math.max(0,particle.life/particle.max);ctx.fillStyle=particle.color;ctx.fillRect(particle.x,particle.y,particle.size,particle.size);
+  }
+  ctx.globalAlpha=1;
+
+  for(const item of S.popups){
+    ctx.globalAlpha=Math.max(0,item.life/item.max);ctx.fillStyle=item.color;ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText(item.text,item.x,item.y);
+  }
+  ctx.globalAlpha=1;ctx.textAlign='left';
+
+  if(S.combo>=6){ctx.fillStyle='#ffe56b';ctx.font='bold 14px monospace';ctx.fillText(`${S.combo} KILL CHAIN`,15,H-18);}
+
+  if(S.boss){
+    const boss=S.boss;
+    ctx.save();ctx.translate(boss.x,boss.y);ctx.shadowColor=boss.type.color;ctx.shadowBlur=24;ctx.fillStyle=boss.type.color;
+    ctx.beginPath();ctx.moveTo(-68,0);ctx.lineTo(-35,-44);ctx.lineTo(28,-35);ctx.lineTo(64,0);ctx.lineTo(28,35);ctx.lineTo(-35,44);ctx.closePath();ctx.fill();
+    ctx.fillStyle=boss.type.accent;ctx.beginPath();ctx.arc(5,0,13+boss.phase*2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.restore();
+    ctx.fillStyle='#070b14cc';ctx.fillRect(W-300,43,260,13);ctx.fillStyle=boss.type.color;ctx.fillRect(W-297,46,254*clamp(boss.hp/boss.maxHp,0,1),7);
+    ctx.fillStyle='#ffffff';ctx.font='bold 10px monospace';ctx.textAlign='right';ctx.fillText(`${boss.type.name}  PHASE ${boss.phase}`,W-42,39);ctx.textAlign='left';
+  }
+
+  const active=S.banners[0];
+  if(active){
+    const alpha=1-Math.abs(active.life/active.max-.5)*1.4;
+    ctx.globalAlpha=clamp(alpha,0,1);ctx.textAlign='center';ctx.fillStyle='#020611bb';ctx.fillRect(W/2-230,H*.17-34,460,76);
+    ctx.fillStyle=active.color;ctx.font='bold 24px monospace';ctx.fillText(active.text,W/2,H*.17);
+    ctx.fillStyle='#ffffff';ctx.font='11px monospace';ctx.fillText(active.sub,W/2,H*.17+22);ctx.textAlign='left';ctx.globalAlpha=1;
+  }
+
+  if(S.flash){ctx.fillStyle=`rgba(255,255,255,${S.flash*1.3})`;ctx.fillRect(0,0,W,H);}
+  ctx.restore();
+}
+
+function endRun(){
+  S.phase='dead';
+  cancelAnimationFrame(raf);
+  S.best=Math.max(S.best,S.time);
+  localStorage.setItem('starwardBest',S.best);
+  eyebrow.textContent='RUN COMPLETE';
+  overlayTitle.textContent=`Survived ${formatTime(S.time)}`;
+  overlayText.textContent=`Build level ${S.level} • ${S.kills} enemies destroyed • ${S.bosses} bosses defeated • Best ${formatTime(S.best)}`;
+  choiceGrid.classList.add('hidden');
+  startBtn.textContent='Build Another Ship';
+  startBtn.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+}
+
+function loop(now){
+  if(S.phase==='dead'||S.phase==='menu') return;
+  const dt=Math.min(.033,(now-last)/1000||.016);
+  last=now;
+  if(S.phase==='running') update(dt);
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+
+startBtn.addEventListener('click',startRun);
+S=freshState();
+updateUI();
+draw();
 })();

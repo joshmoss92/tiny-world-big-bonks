@@ -35,8 +35,10 @@ v12ResolveShotdowns=function(){
       if(dist(b.x,b.y,sh.x,sh.y)>13+(b.hot?3:0))continue;
       b.life=0;if(sh.pierce>0)sh.pierce--;else sh.life=0;hits++;v.shotdowns++;p.manualShotdowns++;
       p.interceptChain=S.time-p.lastInterceptAt<1.15?p.interceptChain+1:1;p.bestInterceptChain=Math.max(p.bestInterceptChain,p.interceptChain);p.lastInterceptAt=S.time;
+      const a=typeof v13Ensure==='function'?v13Ensure():null;if(a){a.combo++;a.comboTimer=3.2;a.bestCombo=Math.max(a.bestCombo,a.combo);}
       burst(b.x,b.y,b.hot?'#fff0a5':'#8ff7ff',b.hot?10:7,170,2);addLaserCharge(.05+v.shotdownCharge);
       if(p.interceptChain>1&&p.interceptChain%5===0){popup('INTERCEPT ×'+p.interceptChain,b.x,b.y-18,'#8ff7ff',.72);addLaserCharge(.35);}
+      if(a&&a.combo>0&&a.combo%8===0){addLaserCharge(.8);popup('COMBAT CHAIN ×'+a.combo,b.x,b.y+22,'#ffe071',.72);}
       if(S.specials.bulletEater&&v.shotdowns%5===0){S.shield=Math.min(S.maxShield,S.shield+1);addLaserCharge(.8);popup('DEFENSE CHAIN',S.ship.x,S.ship.y-35,'#8ff7ff',.8);}
       break;
     }

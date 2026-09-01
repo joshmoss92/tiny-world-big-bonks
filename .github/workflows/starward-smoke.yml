@@ -15,15 +15,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Loader syntax check
+      - name: Runtime and harness syntax check
         run: |
           node --check pocket-starwing/game-v9-loader.js
           node --check pocket-starwing/v10-polish3.js
           node --check pocket-starwing/v10-polish4.js
           node --check pocket-starwing/v10-polish5.js
+          node --check pocket-starwing/v10-polish6.js
+          node --check pocket-starwing/v10-polish7.js
+          node --check pocket-starwing/v10-polish8.js
+          node --check pocket-starwing/smoke-test.cjs
           node --check pocket-starwing/smoke-v105.cjs
           node --check pocket-starwing/smoke-v106.cjs
           node --check pocket-starwing/smoke-v107.cjs
+          node --check pocket-starwing/smoke-v110.cjs
 
   stress:
     needs: syntax
@@ -37,7 +42,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Simulate V10.4 combat seed ${{ matrix.seed }}
+      - name: Simulate full V10.10 runtime seed ${{ matrix.seed }}
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-test.cjs
@@ -53,3 +58,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-v107.cjs
+      - name: Simulate V10.10 precision targeting seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v110.cjs

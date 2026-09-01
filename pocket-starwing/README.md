@@ -1,22 +1,36 @@
 # Pocket Starwing
 
-Original browser arcade rail shooter.
+A self-contained original pixel-art browser rail shooter.
 
-## Controls
-- Left flight pad: analog steering. Vertical travel is broad; horizontal travel is deliberately limited.
-- Dodge: on-screen ↯ button, Shift or C.
-- Firing is automatic while a mission is active.
+## Core feel
+- Native two-axis thumb steering: vertical travel is dominant, horizontal travel is deliberately narrower.
+- Continuous auto-fire; the only action button is dodge.
+- Smooth spring-follow movement with a visible thumb puck.
+- Environmental collision, knockback, readable gaps, breakable terrain and grazing remain core skills.
 
-## Weapon pickups
-Weapon pickups replace or upgrade the current firing style. Each family changes projectile speed, cadence and pattern rather than only damage.
-- Pulse: balanced straight fire.
-- Rapid: very fast projectiles and high cadence.
-- Scatter: slower wide fan patterns.
-- Wave: oscillating projectiles with layered lanes.
-- Seekers: slower homing projectiles.
-- Lance: slow, large, piercing heavy shots.
+## Weapons
+Weapon pickups change projectile speed, cadence and firing pattern. Repeating the same pickup upgrades it to three stars.
+- Pulse — balanced straight fire
+- Rapid — very fast, high-cadence streams
+- Scatter — wide multi-shot fans
+- Wave — oscillating lanes
+- Seek — slower homing projectiles
+- Lance — slow, heavy piercing shots with splash
 
-Collecting the same family upgrades its pattern up to three stars. Later sectors unlock more families.
+## Fun-pass systems
+- Skillful kills and grazes charge a short automatic Overdrive state with faster firing.
+- Encounter pacing now alternates pressure spikes with brief breathing windows.
+- New sniper enemies telegraph powerful shots before firing.
+- New orbiter enemies move in looping vertical patterns.
+- Formation/tunnel play can trigger bonus weapon drops.
+- Later sectors unlock broader enemy and weapon pools.
 
-## Core systems
-Environmental collision, destructible hazards, branching sectors, biome-specific hazards, formations, enemy archetypes, bosses, graze scoring, dodge energy, shields, repairs, score pickups and combo scoring remain part of the core loop.
+## Level progression
+Each biome has recurring mechanical set-pieces:
+- Cloudberry — wind lanes and high/low tunnels
+- Ember — asteroid fields and breakable routes
+- Ruins — moving gate structures
+- Storm — telegraphed lightning sequences
+- Nebula — gravity-well timing disruptions
+
+Route choices alter the mechanical mix and each sector escalates into a boss fight.

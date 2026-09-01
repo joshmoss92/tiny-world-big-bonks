@@ -97,10 +97,6 @@ function aaa8EnsureResultsStack(){
   return true;
 }
 
-if(typeof showResults==='function'){
-  const __aaa8ShowResults=showResults;showResults=function(){const r=__aaa8ShowResults.apply(this,arguments);aaa8EnsureResultsStack();return r;};
-}
-
 const __aaa8Update=update;
 update=function(dt){
   __aaa8Update(dt);
@@ -109,7 +105,6 @@ update=function(dt){
   a.clarity=pressure>82||S.enemies.length>44||S.bullets.length>175;
   if(a.clarity)a.clarityFrames++;
   if(a.lockPulse){a.lockPulse.time=Math.max(0,a.lockPulse.time-dt);if(a.lockPulse.time<=0)a.lockPulse=null;}
-  if(S.phase==='dead')aaa8EnsureResultsStack();
 };
 
 if(typeof window!=='undefined'&&window.__STARWARD__){
@@ -123,8 +118,11 @@ if(typeof window!=='undefined'&&window.__STARWARD__){
 `;
 
   function apply(source){
-    const transformed=base.apply(source);
+    let transformed=base.apply(source);
     for(const hook of ['AAA7_STAGGER','aaa4InputClaimsTarget','aaaDrawHealthBar','aaa7PriorityTarget'])if(!transformed.includes(hook))throw new Error('Starward V10.10 hook missing: '+hook);
+    const finalHook="p2AppendResults();choiceGrid.classList.add('hidden');";
+    if(!transformed.includes(finalHook))throw new Error('Starward V10.10 finalizeRun results hook missing');
+    transformed=transformed.replace(finalHook,"p2AppendResults();aaa8EnsureResultsStack();choiceGrid.classList.add('hidden');");
     const close=transformed.lastIndexOf('})();');
     if(close<0)throw new Error('Starward V10.10 runtime closure not found');
     return transformed.slice(0,close)+POLISH8+'\n'+transformed.slice(close);

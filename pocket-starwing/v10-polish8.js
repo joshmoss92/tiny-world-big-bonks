@@ -82,12 +82,23 @@ function aaa8Grade(){
 }
 
 function aaa8AppendResults(){
-  if(!S||typeof overlayText==='undefined')return;const a=aaa8Ensure();if(a.resultsAdded)return;a.resultsAdded=true;
+  if(!S||typeof overlayText==='undefined')return;const a=aaa8Ensure();if(a.resultsAdded&&/COMMAND GRADE/.test(overlayText.innerHTML||''))return;a.resultsAdded=true;
   const g=aaa8Grade();a.grade=g;
   overlayText.innerHTML+='<div class="tactical-results"><strong>COMMAND GRADE '+g.letter+'</strong><span>Tactical score '+g.score+'</span><span>Precision locks '+a.precisionLocks+'</span><span>Focus staggers '+(S.aaa?.v109?.staggers||0)+'</span></div>';
 }
+
+function aaa8EnsureResultsStack(){
+  if(!S||typeof overlayText==='undefined'||!/BUILD OF THE RUN/.test(overlayText.innerHTML||''))return false;
+  let html=overlayText.innerHTML||'';
+  if(!/TACTICAL COMMAND/.test(html)&&typeof p2AppendResults==='function'){if(S.aaa?.p2)S.aaa.p2.resultsAdded=false;p2AppendResults();html=overlayText.innerHTML||'';}
+  if(!/LOCK DISCIPLINE/.test(html)&&typeof aaa3AppendResults==='function'){if(S.aaa?.v105)S.aaa.v105.resultsAdded=false;aaa3AppendResults();html=overlayText.innerHTML||'';}
+  if(!/SYSTEM WARFARE/.test(html)&&typeof aaa5AppendResults==='function'){if(S.aaa?.v107)S.aaa.v107.resultsAdded=false;aaa5AppendResults();html=overlayText.innerHTML||'';}
+  if(!/COMMAND GRADE/.test(html)){aaa8Ensure().resultsAdded=false;aaa8AppendResults();}
+  return true;
+}
+
 if(typeof showResults==='function'){
-  const __aaa8ShowResults=showResults;showResults=function(){const r=__aaa8ShowResults.apply(this,arguments);aaa8AppendResults();return r;};
+  const __aaa8ShowResults=showResults;showResults=function(){const r=__aaa8ShowResults.apply(this,arguments);aaa8EnsureResultsStack();return r;};
 }
 
 const __aaa8Update=update;
@@ -98,7 +109,7 @@ update=function(dt){
   a.clarity=pressure>82||S.enemies.length>44||S.bullets.length>175;
   if(a.clarity)a.clarityFrames++;
   if(a.lockPulse){a.lockPulse.time=Math.max(0,a.lockPulse.time-dt);if(a.lockPulse.time<=0)a.lockPulse=null;}
-  if(S.phase==='dead'&&!a.resultsAdded&&typeof overlayText!=='undefined'&&/BUILD OF THE RUN/.test(overlayText.innerHTML||''))aaa8AppendResults();
+  if(S.phase==='dead')aaa8EnsureResultsStack();
 };
 
 if(typeof window!=='undefined'&&window.__STARWARD__){
@@ -106,6 +117,7 @@ if(typeof window!=='undefined'&&window.__STARWARD__){
   window.__STARWARD__.aaa8BestTouchTarget=aaa8BestTouchTarget;
   window.__STARWARD__.aaa8ClaimTarget=aaa8ClaimTarget;
   window.__STARWARD__.aaa8Grade=aaa8Grade;
+  window.__STARWARD__.aaa8EnsureResultsStack=aaa8EnsureResultsStack;
 }
 // ---- end V10.10 precision-input layer ----
 `;

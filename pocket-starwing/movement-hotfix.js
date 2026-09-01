@@ -23,6 +23,19 @@
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
+  // Hide the obsolete on-canvas direct-drag hint from the previous control scheme.
+  const renderContext = canvas.getContext('2d');
+  const originalFillText = renderContext.fillText.bind(renderContext);
+  const originalStrokeRect = renderContext.strokeRect.bind(renderContext);
+  renderContext.fillText = function(text, ...args) {
+    if (text === 'HOLD + DRAG SHIP') return;
+    return originalFillText(text, ...args);
+  };
+  renderContext.strokeRect = function(x, y, w, h) {
+    if (w === 52 && h === 38) return;
+    return originalStrokeRect(x, y, w, h);
+  };
+
   function toClient(x, y) {
     const r = canvas.getBoundingClientRect();
     return {

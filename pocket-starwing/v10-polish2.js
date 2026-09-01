@@ -173,7 +173,7 @@ update=function(dt){
   if(S.quality<p.lastQuality-.01)p.qualityDrops++;p.lastQuality=S.quality;
   if(S.phase==='dead'&&!p.resultsAdded&&typeof overlayText!=='undefined'&&/BUILD OF THE RUN/.test(overlayText.innerHTML||'')){
     p.resultsAdded=true;
-    overlayText.innerHTML+=`<div class="tactical-results"><strong>TACTICAL COMMAND</strong><span>Priority kills ${S.aaa.focusKills||0}</span><span>Best focus chain ${Math.max(1,p.maxFocusChain+1)}×</span><span>Capital ships ${S.aaa.capitalKills||0}</span><span>Systems destroyed ${p.systemKills}</span></div>`;
+    overlayText.innerHTML+='<div class="tactical-results"><strong>TACTICAL COMMAND</strong><span>Priority kills '+(S.aaa.focusKills||0)+'</span><span>Best focus chain '+Math.max(1,p.maxFocusChain+1)+'×</span><span>Capital ships '+(S.aaa.capitalKills||0)+'</span><span>Systems destroyed '+p.systemKills+'</span></div>';
   }
 };
 

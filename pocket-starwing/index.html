@@ -13,22 +13,22 @@
       <div class="brand"><span class="brand-mark">✦</span><h1>Starward Run</h1></div>
       <div class="hud" aria-live="polite">
         <span>◷ <b id="time">0:00</b></span>
-        <span>♥ <b id="hull">6/6</b></span>
-        <span>◈ <b id="shield">0/0</b></span>
+        <span>♥ <b id="hull">12/12</b></span>
+        <span>◈ <b id="shield">2/2</b></span>
         <span>◆ <b id="level">1</b></span>
         <span>✧ <b id="salvage">0</b></span>
       </div>
     </header>
 
     <section class="game-wrap">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run automatic survival simulation"></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run automatic survival roguelite"></canvas>
       <div id="overlay" class="overlay">
         <div class="panel">
           <div id="eyebrow" class="eyebrow">AUTOPILOT ROGUELITE</div>
           <h2 id="overlayTitle">Starward Run</h2>
-          <p id="overlayText">The ship flies and fights on its own. Your decisions determine how long it survives.</p>
+          <p id="overlayText">Forge the ship. Watch the build evolve. Survive as long as it can.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
-          <button id="startBtn" class="play-button">Begin Run</button>
+          <button id="startBtn" class="play-button">Forge a Run</button>
         </div>
       </div>
     </section>
@@ -36,16 +36,16 @@
     <section class="systems" aria-label="Ship systems">
       <div><span>DMG</span><b id="statDamage">100%</b></div>
       <div><span>RATE</span><b id="statRate">100%</b></div>
-      <div><span>EVADE</span><b id="statDodge">0</b></div>
-      <div><span>THRUST</span><b id="statThrust">100%</b></div>
-      <div><span>REPAIR</span><b id="statRepair">0</b></div>
+      <div><span>EVADE</span><b id="statDodge">1</b></div>
+      <div><span>THRUST</span><b id="statThrust">108%</b></div>
+      <div><span>REPAIR</span><b id="statRepair">0.008/s</b></div>
       <div><span>LUCK</span><b id="statLuck">0%</b></div>
     </section>
 
     <section class="build-panel">
-      <div class="build-heading"><span>BUILD</span><b id="xpText">0 / 8 XP</b></div>
+      <div class="build-heading"><span>BUILD</span><b id="xpText">0 / 14 XP</b></div>
       <div class="xp"><i id="xpBar"></i></div>
-      <div id="buildChips" class="build-chips"><span class="empty-chip">No upgrades yet</span></div>
+      <div id="buildChips" class="build-chips"><span class="empty-chip">Pulse Cannon ★1</span></div>
     </section>
   </main>
   <script src="game.js"></script>

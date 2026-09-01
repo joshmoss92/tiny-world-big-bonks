@@ -15,7 +15,7 @@
         <span class="brand-glyph">✦</span>
         <div>
           <h1>Starward Run</h1>
-          <p>AUTOPILOT SURVIVAL ROGUELITE</p>
+          <p>AIM-DRIVEN SURVIVAL ROGUELITE</p>
         </div>
       </div>
       <div class="header-actions"><button id="soundBtn" class="tiny-button" type="button">SOUND ON</button></div>
@@ -28,13 +28,13 @@
     </header>
 
     <section class="game-card">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies and fights automatically. Tap the ship when the Star Laser is ready. Tap priority enemies or boss and capital-ship systems to focus fire. Sustained focus can stagger dangerous targets. Timed challenge prompts can be accepted by tapping empty space."></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies straight ahead and fires automatically. Hold and drag on the playfield to aim the firing direction. Release to fire straight ahead. Shoot enemy projectiles and power cores. Live events use their ACCEPT button. Fire the Star Laser with the button below the playfield."></canvas>
 
       <div id="overlay" class="overlay">
         <div class="choice-panel">
-          <div id="eyebrow" class="eyebrow">AUTOPILOT ROGUELITE</div>
-          <h2 id="overlayTitle">Build a ship. Then let it fly.</h2>
-          <p id="overlayText">Make five starting choices. During the run, the ship flies, aims and dodges itself. You decide the build, mark priority targets, trigger the Star Laser, and choose whether to accept dangerous live challenges.</p>
+          <div id="eyebrow" class="eyebrow">AIM-DRIVEN ROGUELITE</div>
+          <h2 id="overlayTitle">Fly straight. Aim everything.</h2>
+          <p id="overlayText">Choose your starting build, then the ship holds a straight flight line and fires automatically. Hold and drag anywhere on the battle to aim. Shoot dangerous enemies, incoming projectiles and power cores, then decide which live risks are worth taking.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
           <div id="metaSummary" class="meta-summary"></div>
           <div class="menu-actions"><button id="startBtn" class="primary-button">Configure Run</button><button id="skinBtn" class="secondary-button" type="button">Ship Skin</button></div>
@@ -46,36 +46,37 @@
       <div class="command-module laser-module">
         <div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div>
         <div class="meter laser-meter"><i id="laserFill"></i></div>
-        <small>Tap the ship when fully charged and online.</small>
+        <button id="laserButton" class="laser-trigger" type="button">FIRE STAR LASER</button>
+        <small>Dedicated control so aiming never fires the laser by accident.</small>
       </div>
 
       <div class="command-module">
         <div class="module-top"><span>THREAT</span><strong id="threatStatus">LOW</strong></div>
         <div class="meter threat-meter"><i id="threatFill"></i></div>
-        <small>Priority enemies can amplify the whole formation.</small>
+        <small>Enemy projectiles can now be shot down with accurate fire.</small>
       </div>
 
       <div class="command-module">
         <div class="module-top"><span>BUILD PROGRESS</span><strong id="upgradeStatus">0 / 84</strong></div>
         <div class="meter upgrade-meter"><i id="upgradeFill"></i></div>
-        <small>Choices are intentionally spaced out.</small>
+        <small>Upgrade decisions arrive more often in the new combat rhythm.</small>
       </div>
     </section>
 
     <section class="build-strip">
       <div class="build-heading">
         <span>ACTIVE BUILD</span>
-        <small>Live challenges never pause the fight.</small>
+        <small>Shoot glowing power cores for temporary combat surges.</small>
       </div>
       <div id="buildChips" class="build-chips"></div>
     </section>
 
     <footer>
-      <span>Idle by default.</span>
-      <span>Tap ship = Star Laser.</span>
-      <span>Tap priority enemy/system = focus fire for 8s.</span>
-      <span>Hold focus = stagger dangerous targets.</span>
-      <span>Timed challenge = tap empty space to accept.</span>
+      <span>Hold + drag = aim.</span>
+      <span>Release = fire forward.</span>
+      <span>Shoot projectiles = defend.</span>
+      <span>Shoot power cores = power up.</span>
+      <span>Live event = tap ACCEPT.</span>
     </footer>
   </main>
   <script src="v10-transform.js"></script>
@@ -89,6 +90,7 @@
   <script src="v10-polish7.js"></script>
   <script src="v10-polish8.js"></script>
   <script src="v10-polish9.js"></script>
+  <script src="v12-aim-controls.js"></script>
   <script src="game-v9-loader.js"></script>
 </body>
 </html>

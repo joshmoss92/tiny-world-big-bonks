@@ -32,6 +32,7 @@ jobs:
           node --check pocket-starwing/v16-power-state.js
           node --check pocket-starwing/v17-flow-choice.js
           node --check pocket-starwing/v18-mechanics.js
+          node --check pocket-starwing/v19-cinematic.js
           node --check pocket-starwing/smoke-test.cjs
           node --check pocket-starwing/smoke-v105.cjs
           node --check pocket-starwing/smoke-v106.cjs
@@ -42,6 +43,7 @@ jobs:
           node --check pocket-starwing/smoke-v16.cjs
           node --check pocket-starwing/smoke-v17.cjs
           node --check pocket-starwing/smoke-v18.cjs
+          node --check pocket-starwing/smoke-v19.cjs
           node --check pocket-starwing/sim-v17.cjs
 
   synthetic-play-model:
@@ -107,3 +109,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-v18.cjs
+      - name: Simulate V19 cinematic spectacle runtime seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v19.cjs

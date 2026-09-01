@@ -21,12 +21,12 @@
     </header>
 
     <section class="game-wrap">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run automatic survival roguelite"></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run automatic survival roguelite. Tap the ship when the Star Laser is fully charged."></canvas>
       <div id="overlay" class="overlay">
         <div class="panel">
           <div id="eyebrow" class="eyebrow">IDLE ROGUELITE</div>
           <h2 id="overlayTitle">Starward Run</h2>
-          <p id="overlayText">Build the ship, then watch it fly and fight. You only step in for important decisions.</p>
+          <p id="overlayText">Build the ship, then watch it fight. Kills charge the Star Laser — tap the ship when it reaches 100%.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
           <button id="startBtn" class="play-button">Build a Ship</button>
         </div>
@@ -43,11 +43,11 @@
     </section>
 
     <section class="build-panel">
-      <div class="build-heading"><span>UPGRADE METER</span><b id="xpText">0 / 70</b></div>
+      <div class="build-heading"><span>UPGRADE METER</span><b id="xpText">0 / 58</b></div>
       <div class="xp"><i id="xpBar"></i></div>
       <div id="buildChips" class="build-chips"><span class="weapon-chip">• Pulse Cannon Lv.1</span></div>
     </section>
   </main>
-  <script src="game.js"></script>
+  <script src="game-v4.js"></script>
 </body>
 </html>

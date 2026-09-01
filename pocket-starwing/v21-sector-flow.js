@@ -27,7 +27,6 @@ function v21Ensure(){
 function v21Durability(){return (S.hull||S.hp||0)+(S.shield||0);}
 function v21SectorBiome(n){return BIOMES[(Math.max(1,n)-1)%BIOMES.length];}
 
-// Sector progression is now boss-gated. The legacy time-based sector increment is intentionally disabled.
 updateSector=function(){return S?.sector||1;};
 
 const __v21ShowBossReward=showBossReward;
@@ -113,10 +112,7 @@ hurtShip=function(amount){
 };
 
 const __v21UpdateEnemies=updateEnemies;
-updateEnemies=function(dt){
-  v21CollisionContext=true;
-  try{return __v21UpdateEnemies(dt);}finally{v21CollisionContext=false;}
-};
+updateEnemies=function(dt){v21CollisionContext=true;try{return __v21UpdateEnemies(dt);}finally{v21CollisionContext=false;}};
 
 const __v21AcceptLiveEvent=acceptLiveEvent;
 acceptLiveEvent=function(){const q=v21Ensure(),had=!!S.liveEvent,r=__v21AcceptLiveEvent();if(q&&had&&r!==false){q.eventAccepted++;q.eventPaused=false;}return r;};
@@ -155,8 +151,7 @@ function v21DrawTransition(){
   ctx.restore();
 }
 function v21Clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-const __v21Draw=draw;
-draw=function(){__v21Draw();v21DrawPauseBadge();v21DrawTransition();};
+const __v21Draw=draw;draw=function(){__v21Draw();v21DrawPauseBadge();v21DrawTransition();};
 
 function v21AppendResults(){
   if(!S||typeof overlayText==='undefined')return;const q=v21Ensure();if(!q||q.resultAdded||/SECTOR FLOW/.test(overlayText.innerHTML||''))return;q.resultAdded=true;
@@ -166,7 +161,7 @@ function v21AppendResults(){
 if(typeof window!=='undefined'&&window.__STARWARD__){
   window.__STARWARD__.v21State=()=>S?.v21||null;
   window.__STARWARD__.v21ForceSectorClear=name=>v21BeginSectorClear(name||'TEST BOSS');
-  window.__STARWARD__.v21SpawnSectorBoss=()=>spawnBoss(false);
+  window.__STARWARD__.v21SpawnSectorBoss=()=>{spawnBoss(false);return S.boss;};
   window.__STARWARD__.v21TestEvent=(seconds=5)=>{S.liveEvent={kind:'v21test',title:'TACTICAL TEST',body:'Pause validation',time:seconds,max:seconds,accept(){banner('TEST ACCEPTED','#8ff7ff','');}};return S.liveEvent;};
   window.__STARWARD__.v21UpdateSector=()=>updateSector();
 }

@@ -48,6 +48,7 @@ jobs:
           node --check pocket-starwing/smoke-v19.cjs
           node --check pocket-starwing/smoke-v20.cjs
           node --check pocket-starwing/smoke-v21.cjs
+          node --check pocket-starwing/smoke-v21-final.cjs
           node --check pocket-starwing/sim-v17.cjs
 
   synthetic-play-model:
@@ -111,4 +112,4 @@ jobs:
         run: node pocket-starwing/smoke-v20.cjs
       - name: Simulate V21 sector-flow runtime seed ${{ matrix.seed }}
         env: { STARWARD_SEED: '${{ matrix.seed }}' }
-        run: node pocket-starwing/smoke-v21.cjs
+        run: node pocket-starwing/smoke-v21-final.cjs

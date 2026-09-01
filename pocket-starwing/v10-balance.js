@@ -1,15 +1,14 @@
 (function(root,factory){
-  const api=factory();
-  if(typeof module==='object'&&module.exports)module.exports=api;
-  else root.StarwardV10Balance=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  if(typeof module==='object'&&module.exports)module.exports=factory(require('./v10-polish2.js'));
+  else root.StarwardV10Transform=factory(root.StarwardV10Transform);
+})(typeof globalThis!=='undefined'?globalThis:this,function(base){
   'use strict';
+  if(!base||typeof base.apply!=='function')throw new Error('Starward V10.2 transform missing');
   function swap(source,from,to,label){
     if(!source.includes(from))throw new Error(`V10 balance hook missing: ${label}`);
     return source.replace(from,to);
   }
-  function apply(source){
-    if(typeof source!=='string')throw new TypeError('Starward V10 balance expects source text');
+  function rebalance(source){
     source=swap(source,"nextFormationAt:24,nextCapitalAt:58","nextFormationAt:28,nextCapitalAt:70",'director start');
     source=swap(source,"e.hp*=2.3;e.maxHp=e.hp","e.hp*=1.65;e.maxHp=e.hp",'capital durability');
     source=swap(source,"[[0,-72,'guardian'],[0,72,'guardian'],[-55,-108,'gunner'],[-55,108,'gunner'],[-90,-38,'scout'],[-90,38,'scout']]","[[0,-70,'guardian'],[0,70,'guardian'],[-78,-35,'scout'],[-78,35,'scout']]",'formation size');
@@ -24,6 +23,10 @@
     if(!/laserCharge:1(?=[},])/.test(source))throw new Error('V10 balance hook missing: base laser charge');
     source=source.replace(/laserCharge:1(?=[},])/,'laserCharge:1.2');
     return source;
+  }
+  function apply(source){
+    if(typeof source!=='string')throw new TypeError('Starward V10 balance expects source text');
+    return rebalance(base.apply(source));
   }
   return {apply};
 });

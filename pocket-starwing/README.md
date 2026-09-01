@@ -7,8 +7,12 @@ Starward Run is an autopilot survival roguelite: the ship flies, aims and dodges
 - Five pre-flight choices, ending with an explicit run-defining doctrine.
 - Automatic movement, aiming, firing and dodging.
 - Tap the ship to fire the Star Laser when charged and its 30-second lock has expired.
-- Tap an enemy or a destructible boss system to focus the arsenal for 7 seconds and gain a damage bonus.
+- Tap an enemy or a destructible boss system to focus the arsenal for 8 seconds and gain a large damage bonus.
 - Timed live events continue combat while the player gets five seconds to opt in.
+
+## Targeting balance
+
+Normal enemies now have substantially more health so dangerous ships remain on screen long enough to become real tactical priorities. Focus Fire is deliberately the counterweight: a focused target receives a much larger damage multiplier, letting the player rapidly remove a gunner, elite, carrier or boss system that matters most instead of simply watching the autopilot pick whatever is closest.
 
 ## V9 production systems
 
@@ -48,8 +52,9 @@ Stellar Cores unlock breadth: weapons, events, biomes, doctrines, signature upgr
 `smoke-test.cjs` runs a deterministic multi-minute simulation and verifies:
 
 - five pre-flight choices and doctrine UX
+- durable enemies and stronger 8-second focus fire
 - dense combat and sparse blocking choices
-- live events and focus fire
+- live events
 - 30-second Star Laser lock
 - weapon evolution
 - elite affixes

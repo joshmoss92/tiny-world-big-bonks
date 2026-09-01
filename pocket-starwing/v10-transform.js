@@ -26,7 +26,7 @@ function aaaEnsureState(){
   if(S.aaa)return;
   S.aaa={
     tutorialSpawned:false,nextFormationAt:22,nextCapitalAt:52,nextPriorityAlertAt:16,
-    bossWasAlive:false,focusKills:0,capitalKills:0,lastTargetRewardAt:-99,performancePressure:0
+    bossWasAlive:false,focusKills:0,capitalKills:0,lastTargetRewardAt:-99,performancePressure:0,focusCapitalSystem:null
   };
 }
 
@@ -65,8 +65,9 @@ function aaaSpawnPriorityFormation(){
   const y=rand(125,H-125),x=W+90;
   const anchor=spawnEnemy(chance(.48)?'healer':'carrier',y,{x:x+70});
   if(anchor){anchor.aaaFormationAnchor=true;anchor.hp*=1.2;anchor.maxHp=anchor.hp;}
+  const guards=[];
   for(const [dx,dy,type] of [[0,-72,'guardian'],[0,72,'guardian'],[-55,-108,'gunner'],[-55,108,'gunner'],[-90,-38,'scout'],[-90,38,'scout']]){
-    const e=spawnEnemy(type,y+dy,{x:x+dx});if(e)e.aaaFormation=true;
+    const e=spawnEnemy(type,y+dy,{x:x+dx});if(e){e.aaaFormation=true;guards.push(e);}
   }
   banner('ESCORT FORMATION','#ffd96f',anchor?.type==='healer'?'Healer protected by a guard screen':'Carrier protected by a guard screen');
   return true;
@@ -77,6 +78,11 @@ function aaaSpawnCapital(){
   const y=rand(150,H-150),e=spawnEnemy('carrier',y,{x:W+105});
   if(!e)return false;
   e.aaaCapital=true;e.elite=true;e.size=Math.max(e.size,45);e.hp*=2.7;e.maxHp=e.hp;e.fire=Math.min(e.fire||2,1.5);e.aaaLaunchAt=S.time+2.2;e.color='#ffd36f';
+  e.aaaSystems=[
+    {id:'weapons',label:'WEAPONS',ox:12,oy:-18,hp:e.maxHp*.22,maxHp:e.maxHp*.22},
+    {id:'hangar',label:'HANGAR',ox:10,oy:18,hp:e.maxHp*.20,maxHp:e.maxHp*.20},
+    {id:'engines',label:'ENGINES',ox:-27,oy:0,hp:e.maxHp*.18,maxHp:e.maxHp*.18}
+  ];
   for(let i=0;i<4;i++){const g=spawnEnemy(i<2?'guardian':'gunner',y+(i-1.5)*62,{x:W+30+i*18});if(g){g.aaaEscort=true;g.hp*=1.15;g.maxHp=g.hp;}}
   banner('CAPITAL SHIP','#ffcf67','A fighter-launching warship has entered the lane');
   S.screenShake=Math.max(S.screenShake,6);
@@ -113,7 +119,13 @@ function aaaEnemySystems(dt){
     if(c.affix?.id==='commander'){
       for(const e of S.enemies){if(e!==c&&e.hp>0&&dist(c.x,c.y,e.x,e.y)<180){e.hp=Math.min(e.maxHp,e.hp+2.2*dt);e.fire=Math.max(.03,e.fire-.16*dt);}}
     }
-    if((c.type==='carrier'||c.aaaCapital)&&now>=(c.aaaLaunchAt||0)&&S.enemies.length<MAX_ENEMIES-3){
+    const capSystems=c.aaaCapital&&Array.isArray(c.aaaSystems)?Object.fromEntries(c.aaaSystems.map(x=>[x.id,x])):null;
+    if(c.aaaCapital&&capSystems){
+      if(capSystems.engines?.hp<=0)c.x+=ENEMIES[c.type].speed*S.combatSpeed*dt*.42;
+      if(capSystems.weapons?.hp<=0)c.fire+=dt*.38;
+    }
+    const hangarOnline=!capSystems||capSystems.hangar?.hp>0;
+    if((c.type==='carrier'||c.aaaCapital)&&hangarOnline&&now>=(c.aaaLaunchAt||0)&&S.enemies.length<MAX_ENEMIES-3){
       c.aaaLaunchAt=now+(c.aaaCapital?3.7:5.6);
       const n=c.aaaCapital?3:2;
       for(let i=0;i<n;i++){const d=spawnEnemy('dart',c.y+(i-(n-1)/2)*24,{x:c.x-12});if(d){d.aaaLaunched=true;d.baseY=d.y;}}
@@ -133,6 +145,17 @@ updateProjectiles=function(dt){
   __aaaUpdateProjectiles(dt);
   for(const [e,hp] of before){
     if(e.hp<hp&&e.hp>0&&e.aaaGuarded&&S.focusTarget!==e){const lost=hp-e.hp;e.hp+=lost*.24;}
+    if(e.hp<hp&&e.aaaCapital&&S.aaa?.focusCapitalSystem?.enemy===e&&S.focusTimer>0){
+      const sys=S.aaa.focusCapitalSystem.system,lost=hp-e.hp;
+      if(sys&&sys.hp>0){
+        const was=sys.hp;sys.hp=Math.max(0,sys.hp-lost*1.35);
+        if(was>0&&sys.hp<=0){
+          addLaserCharge(1.5);gainXP(2);S.screenShake=Math.max(S.screenShake,7);burst(e.x+sys.ox,e.y+sys.oy,'#fff1a8',36,320,4);
+          banner(sys.label+' OFFLINE','#ffe08a',sys.id==='weapons'?'Enemy fire rate crippled':sys.id==='hangar'?'Fighter launches stopped':'Warship movement crippled');
+          const next=e.aaaSystems.find(x=>x.hp>0);S.aaa.focusCapitalSystem=next?{enemy:e,system:next}:null;
+        }
+      }
+    }
   }
   if(S.boss&&bossBefore!=null&&S.boss.hp<bossBefore&&Array.isArray(S.boss.parts)){
     const lost=bossBefore-S.boss.hp;
@@ -215,6 +238,40 @@ function aaaUpdate(dt){
 const __aaaUpdate=update;
 update=function(dt){__aaaUpdate(dt);aaaUpdate(dt);};
 
+function aaaCapitalSystemPoint(e,sys){return {x:e.x+sys.ox,y:e.y+sys.oy};}
+function aaaFocusCapitalSystem(e,sys){
+  if(!S||!e?.aaaCapital||!sys||sys.hp<=0)return false;
+  aaaEnsureState();S.focusTarget=e;S.focusBossPart=null;S.focusTimer=8;S.aaa.focusCapitalSystem={enemy:e,system:sys};
+  sfx('focus');popup(sys.label,e.x+sys.ox,e.y+sys.oy-24,'#fff1a8',.8);return true;
+}
+function aaaPointerCapital(ev){
+  if(!S||S.phase!=='running')return;
+  const rect=canvas.getBoundingClientRect(),x=(ev.clientX-rect.left)*(W/rect.width),y=(ev.clientY-rect.top)*(H/rect.height);
+  for(const e of S.enemies){
+    if(!e?.aaaCapital||e.hp<=0||!Array.isArray(e.aaaSystems))continue;
+    for(const sys of e.aaaSystems){
+      if(sys.hp<=0)continue;const p=aaaCapitalSystemPoint(e,sys);
+      if(dist(x,y,p.x,p.y)<22){aaaFocusCapitalSystem(e,sys);return;}
+    }
+  }
+}
+canvas.addEventListener('pointerdown',aaaPointerCapital);
+
+function aaaDrawTacticalAura(e){
+  if(e.aaaGuarded){ctx.save();ctx.globalAlpha=.28;ctx.strokeStyle='#78d9ff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,e.size+9+Math.sin(S.time*5)*2,0,TWO_PI);ctx.stroke();ctx.restore();}
+  if(e.affix?.id==='commander'){ctx.save();ctx.globalAlpha=.22;ctx.strokeStyle='#ffd76e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,e.size+15+Math.sin(S.time*4)*3,0,TWO_PI);ctx.stroke();ctx.restore();}
+}
+function aaaDrawCapitalSystems(e){
+  if(!e.aaaCapital||!Array.isArray(e.aaaSystems))return;
+  for(const sys of e.aaaSystems){
+    const ratio=sys.maxHp?clamp(sys.hp/sys.maxHp,0,1):0;
+    ctx.save();ctx.translate(sys.ox,sys.oy);ctx.globalAlpha=sys.hp>0?.95:.24;ctx.fillStyle=sys.hp>0?'#fff1a8':'#3d4148';ctx.fillRect(-6,-6,12,12);ctx.strokeStyle='#ffffff';ctx.lineWidth=1;ctx.strokeRect(-8,-8,16,16);
+    if(sys.hp>0){ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(-12,10,24,3);ctx.fillStyle='#ffe08a';ctx.fillRect(-12,10,24*ratio,3);}
+    if(S.aaa?.focusCapitalSystem?.enemy===e&&S.aaa.focusCapitalSystem.system===sys&&S.focusTimer>0){ctx.strokeStyle='#8ff7ff';ctx.lineWidth=2;ctx.strokeRect(-13,-13,26,26);ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.fillText(sys.label,0,-16);}
+    ctx.restore();
+  }
+}
+
 function aaaDrawHealthBar(e){
   if(!e||e.hp<=0||!e.maxHp)return;
   const role=aaaRole(e),ratio=clamp(e.hp/e.maxHp,0,1);
@@ -237,14 +294,14 @@ function aaaDrawDamageState(e){
 
 if(typeof drawEnemy==='function'){
   const __aaaDrawEnemy=drawEnemy;
-  drawEnemy=function(e){__aaaDrawEnemy(e);if(!e||e.hp<=0)return;ctx.save();ctx.translate(e.x,e.y);aaaDrawDamageState(e);aaaDrawHealthBar(e);ctx.restore();};
+  drawEnemy=function(e){__aaaDrawEnemy(e);if(!e||e.hp<=0)return;ctx.save();ctx.translate(e.x,e.y);aaaDrawTacticalAura(e);aaaDrawDamageState(e);aaaDrawCapitalSystems(e);aaaDrawHealthBar(e);ctx.restore();};
 }
 
 function aaaDrawFocusChoreography(){
   if(!S||S.phase!=='running'||!S.focusTarget||S.focusTimer<=0)return;
-  const t=S.focusTarget;if(t.hp<=0)return;
+  const t=S.focusTarget;if(t.hp<=0)return;const cap=S.aaa?.focusCapitalSystem?.enemy===t?S.aaa.focusCapitalSystem.system:null,tx=cap?t.x+cap.ox:t.x,ty=cap?t.y+cap.oy:t.y;
   ctx.save();ctx.globalAlpha=.17+.07*Math.sin(S.time*12);ctx.strokeStyle='#8ff7ff';ctx.lineWidth=1;
-  for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(S.ship.x+24,S.ship.y+i*6);ctx.lineTo(t.x-t.size*.7,t.y+i*4);ctx.stroke();}
+  for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(S.ship.x+24,S.ship.y+i*6);ctx.lineTo(tx-(cap?0:t.size*.7),ty+i*4);ctx.stroke();}
   ctx.globalAlpha=.55;ctx.fillStyle='#8ff7ff';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText('LOCK '+S.focusTimer.toFixed(1)+'s',S.ship.x+38,S.ship.y-28);ctx.restore();
 }
 
@@ -267,6 +324,7 @@ if(typeof window!=='undefined'&&window.__STARWARD__){
   window.__STARWARD__.aaaSpawnCapital=aaaSpawnCapital;
   window.__STARWARD__.aaaSpawnFormation=aaaSpawnPriorityFormation;
   window.__STARWARD__.aaaRole=aaaRole;
+  window.__STARWARD__.aaaFocusCapitalSystem=aaaFocusCapitalSystem;
 }
 // ---- end V10 tactical depth layer ----
 `;

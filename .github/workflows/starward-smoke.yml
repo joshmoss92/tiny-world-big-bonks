@@ -19,7 +19,9 @@ jobs:
         run: |
           node --check pocket-starwing/game-v9-loader.js
           node --check pocket-starwing/v10-polish3.js
+          node --check pocket-starwing/v10-polish4.js
           node --check pocket-starwing/smoke-v105.cjs
+          node --check pocket-starwing/smoke-v106.cjs
 
   stress:
     needs: syntax
@@ -41,3 +43,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-v105.cjs
+      - name: Simulate V10.6 input and subsystem UX seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v106.cjs

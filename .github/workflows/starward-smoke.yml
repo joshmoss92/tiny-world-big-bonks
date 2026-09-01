@@ -16,7 +16,10 @@ jobs:
         with:
           node-version: '22'
       - name: Loader syntax check
-        run: node --check pocket-starwing/game-v9-loader.js
+        run: |
+          node --check pocket-starwing/game-v9-loader.js
+          node --check pocket-starwing/v10-polish3.js
+          node --check pocket-starwing/smoke-v105.cjs
 
   stress:
     needs: syntax
@@ -34,3 +37,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-test.cjs
+      - name: Simulate V10.5 tactical polish seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v105.cjs

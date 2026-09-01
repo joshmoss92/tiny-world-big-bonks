@@ -1,38 +1,34 @@
 # Starward Run
 
-An original browser idle roguelite survival autoscroller. The ship flies, aims, shoots and dodges automatically; the player shapes the run through occasional upgrade and route decisions.
+Starward Run is an original browser-based idle survival roguelite.
 
-## Core loop
+## The design
 
-1. Every run starts with five setup choices. Each choice offers three upgrades.
-2. The ship then fights on its own at a fast visual pace.
-3. Normal upgrade decisions are intentionally spaced apart, even if the upgrade meter fills early.
-4. Route events appear occasionally and resolve in a single decision rather than chaining into more menus.
-5. Dreadnought bosses provide rare boss-reward choices.
-6. The run continues until the build can no longer survive the escalating threat.
+The ship flies, aims, shoots and dodges automatically. The player makes high-value decisions instead of steering constantly:
 
-## Upgrade language
+- Five structured pre-flight choices establish the run.
+- Build choices are deliberately spaced out.
+- Kills charge a screen-clearing Star Laser, but it can fire at most once every 30 seconds.
+- Timed live challenges appear without pausing combat. Tap the playfield within five seconds to opt into extra danger and rewards, or ignore them.
+- Bosses, sectors, escalating enemy formations and build synergies create long-run structure.
+- Backgrounds use biome-specific parallax, planets, nebulae, debris, energy bands and comets.
 
-Upgrade cards use plain-English names and effects such as:
-- Reinforced Hull — more maximum hull.
-- Larger Shield — more rechargeable shield.
-- Faster Repairs — passive hull repair.
-- Better Dodging — earlier autopilot reactions.
-- Faster Engines — quicker movement between safe lanes.
-- Weapon Damage / Fire Rate / Critical Chance.
-- Piercing Shots / Blast Radius.
-- Salvage Bonus / Upgrade Progress / Rarity Luck.
-- Weapon cards clearly say `Unlock` or `Upgrade` and show the resulting level.
+## UX principles
 
-Rarities are colour coded: Rare, Epic, Legendary, Mythic and God.
+The interface is designed around three questions:
 
-## Idle pacing
+1. How healthy is the ship?
+2. Is the Star Laser ready?
+3. Is there a live decision worth taking?
 
-- Five setup choices before combat.
-- Normal choices cannot interrupt more frequently than roughly once every 68 seconds.
-- Route events are roughly two minutes apart and never open follow-up choice chains.
-- Bosses are several minutes apart and provide a single special reward choice.
-- Adaptive pressure eases enemy density when hull is low.
-- Breather windows periodically clear pressure without requiring input.
+Everything else stays secondary so the game remains readable while enemy density climbs.
 
-The visual travel speed is deliberately faster than the combat lethality, so the game looks energetic without simply making enemy fire unfairly fast.
+## Validation
+
+`smoke-test.cjs` verifies:
+- the five-step starting draft,
+- the run starts correctly,
+- live events appear and can be accepted,
+- enemy density reaches a meaningful level,
+- blocking upgrade choices stay limited,
+- and Star Laser activations never occur less than 30 seconds apart.

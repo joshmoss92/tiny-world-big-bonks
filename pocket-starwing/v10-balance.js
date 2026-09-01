@@ -20,6 +20,9 @@
     source=swap(source,"a.nextCapitalAt=S.time+rand(80,102)","a.nextCapitalAt=S.time+rand(100,130)",'capital cadence');
     source=swap(source,"addLaserCharge(capital?5:2.5);gainXP(capital?6:2);","addLaserCharge(capital?7:3.5);gainXP(capital?6:2);",'focus reward');
     source=swap(source,"addLaserCharge(1.5);gainXP(2);","addLaserCharge(2.5);gainXP(2);",'system reward');
+    source=swap(source,"canvas.addEventListener('pointerdown',aaaPointerCapital);","// V10.2 owns capital-system pointer targeting.",'duplicate capital pointer');
+    source=swap(source,"aaaDrawTacticalAura(e);aaaDrawDamageState(e);aaaDrawCapitalSystems(e);aaaDrawHealthBar(e);","aaaDrawTacticalAura(e);aaaDrawDamageState(e);aaaDrawHealthBar(e);",'duplicate capital system render');
+    source=swap(source,"if(role.priority>=2){ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle=e.aaaCapital?'#ffd36f':'#f4fbff';ctx.fillText(role.icon+' '+role.label,0,y-5);}","if(role.priority>=3||e.elite||e.aaaCapital||S.focusTarget===e){ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle=e.aaaCapital?'#ffd36f':'#f4fbff';ctx.fillText(role.icon+' '+role.label,0,y-5);}",'role label clutter');
     if(!/laserCharge:1(?=[},])/.test(source))throw new Error('V10 balance hook missing: base laser charge');
     source=source.replace(/laserCharge:1(?=[},])/,'laserCharge:1.2');
     return source;

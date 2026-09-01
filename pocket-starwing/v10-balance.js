@@ -23,6 +23,7 @@
     source=swap(source,"canvas.addEventListener('pointerdown',aaaPointerCapital);","// V10.2 owns capital-system pointer targeting.",'duplicate capital pointer');
     source=swap(source,"aaaDrawTacticalAura(e);aaaDrawDamageState(e);aaaDrawCapitalSystems(e);aaaDrawHealthBar(e);","aaaDrawTacticalAura(e);aaaDrawDamageState(e);aaaDrawHealthBar(e);",'duplicate capital system render');
     source=swap(source,"if(role.priority>=2){ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle=e.aaaCapital?'#ffd36f':'#f4fbff';ctx.fillText(role.icon+' '+role.label,0,y-5);}","if(role.priority>=3||e.elite||e.aaaCapital||S.focusTarget===e){ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle=e.aaaCapital?'#ffd36f':'#f4fbff';ctx.fillText(role.icon+' '+role.label,0,y-5);}",'role label clutter');
+    source=swap(source,"choiceGrid.classList.add('hidden');startBtn.textContent='ONE-TAP RESTART';","p2AppendResults();choiceGrid.classList.add('hidden');startBtn.textContent='ONE-TAP RESTART';",'results tactical summary');
     if(!/laserCharge:1(?=[},])/.test(source))throw new Error('V10 balance hook missing: base laser charge');
     source=source.replace(/laserCharge:1(?=[},])/,'laserCharge:1.2');
     return source;

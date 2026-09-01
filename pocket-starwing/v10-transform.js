@@ -25,7 +25,7 @@ function aaaEnsureState(){
   if(!S)return;
   if(S.aaa)return;
   S.aaa={
-    tutorialSpawned:false,nextFormationAt:22,nextCapitalAt:52,nextPriorityAlertAt:16,
+    tutorialSpawned:false,nextFormationAt:24,nextCapitalAt:58,nextPriorityAlertAt:16,
     bossWasAlive:false,focusKills:0,capitalKills:0,lastTargetRewardAt:-99,performancePressure:0,focusCapitalSystem:null
   };
 }
@@ -77,7 +77,7 @@ function aaaSpawnCapital(){
   if(!S||S.enemies.length>MAX_ENEMIES-8)return false;
   const y=rand(150,H-150),e=spawnEnemy('carrier',y,{x:W+105});
   if(!e)return false;
-  e.aaaCapital=true;e.elite=true;e.size=Math.max(e.size,45);e.hp*=2.7;e.maxHp=e.hp;e.fire=Math.min(e.fire||2,1.5);e.aaaLaunchAt=S.time+2.2;e.color='#ffd36f';
+  e.aaaCapital=true;e.elite=true;e.size=Math.max(e.size,45);e.hp*=2.3;e.maxHp=e.hp;e.fire=Math.min(e.fire||2,1.5);e.aaaLaunchAt=S.time+2.2;e.color='#ffd36f';
   e.aaaSystems=[
     {id:'weapons',label:'WEAPONS',ox:12,oy:-18,hp:e.maxHp*.22,maxHp:e.maxHp*.22},
     {id:'hangar',label:'HANGAR',ox:10,oy:18,hp:e.maxHp*.20,maxHp:e.maxHp*.20},
@@ -117,7 +117,7 @@ function aaaEnemySystems(dt){
   for(const c of S.enemies){
     if(!c||c.hp<=0)continue;
     if(c.affix?.id==='commander'){
-      for(const e of S.enemies){if(e!==c&&e.hp>0&&dist(c.x,c.y,e.x,e.y)<180){e.hp=Math.min(e.maxHp,e.hp+2.2*dt);e.fire=Math.max(.03,e.fire-.16*dt);}}
+      for(const e of S.enemies){if(e!==c&&e.hp>0&&dist(c.x,c.y,e.x,e.y)<180){e.hp=Math.min(e.maxHp,e.hp+1.4*dt);e.fire=Math.max(.03,e.fire-.10*dt);}}
     }
     const capSystems=c.aaaCapital&&Array.isArray(c.aaaSystems)?Object.fromEntries(c.aaaSystems.map(x=>[x.id,x])):null;
     if(c.aaaCapital&&capSystems){
@@ -125,11 +125,13 @@ function aaaEnemySystems(dt){
       if(capSystems.weapons?.hp<=0)c.fire+=dt*.38;
     }
     const hangarOnline=!capSystems||capSystems.hangar?.hp>0;
-    if((c.type==='carrier'||c.aaaCapital)&&hangarOnline&&now>=(c.aaaLaunchAt||0)&&S.enemies.length<MAX_ENEMIES-3){
-      c.aaaLaunchAt=now+(c.aaaCapital?3.7:5.6);
-      const n=c.aaaCapital?3:2;
-      for(let i=0;i<n;i++){const d=spawnEnemy('dart',c.y+(i-(n-1)/2)*24,{x:c.x-12});if(d){d.aaaLaunched=true;d.baseY=d.y;}}
-      if(c.aaaCapital)popup('FIGHTERS',c.x,c.y-42,'#ffd36f',.8);
+    if(c.aaaCapital&&hangarOnline&&now>=(c.aaaLaunchAt||0)&&S.enemies.length<MAX_ENEMIES-2){
+      c.aaaLaunchAt=now+5.2;
+      for(let i=0;i<2;i++){const d=spawnEnemy('dart',c.y+(i-.5)*26,{x:c.x-12});if(d){d.aaaLaunched=true;d.baseY=d.y;}}
+      popup('FIGHTERS',c.x,c.y-42,'#ffd36f',.8);
+    }else if(c.type==='carrier'&&!c.aaaCapital&&!c.aaaLaunchedOnce&&c.x<W-80&&S.enemies.length<MAX_ENEMIES-2){
+      c.aaaLaunchedOnce=true;
+      for(let i=0;i<2;i++){const d=spawnEnemy('dart',c.y+(i-.5)*24,{x:c.x-10});if(d){d.aaaLaunched=true;d.baseY=d.y;}}
     }
   }
 }
@@ -144,7 +146,7 @@ updateProjectiles=function(dt){
   const bossBefore=S.boss?S.boss.hp:null;
   __aaaUpdateProjectiles(dt);
   for(const [e,hp] of before){
-    if(e.hp<hp&&e.hp>0&&e.aaaGuarded&&S.focusTarget!==e){const lost=hp-e.hp;e.hp+=lost*.24;}
+    if(e.hp<hp&&e.hp>0&&e.aaaGuarded&&S.focusTarget!==e){const lost=hp-e.hp;e.hp+=lost*.18;}
     if(e.hp<hp&&e.aaaCapital&&S.aaa?.focusCapitalSystem?.enemy===e&&S.focusTimer>0){
       const sys=S.aaa.focusCapitalSystem.system,lost=hp-e.hp;
       if(sys&&sys.hp>0){
@@ -214,12 +216,12 @@ function aaaUpdate(dt){
   const a=S.aaa;
   if(!a.tutorialSpawned&&S.time>9){
     a.tutorialSpawned=true;
-    const h=spawnEnemy('healer',H*.38,{x:W+35});if(h){h.hp*=1.35;h.maxHp=h.hp;h.aaaTutorial=true;}
+    const h=spawnEnemy('healer',H*.38,{x:W+35});if(h){h.hp*=1.2;h.maxHp=h.hp;h.aaaTutorial=true;}
     for(const dy of [-62,62]){const g=spawnEnemy('guardian',H*.38+dy,{x:W+5});if(g)g.aaaTutorial=true;}
     banner('PRIORITY TARGET','#8ff7ff','Tap the HEALER to focus the entire arsenal');
   }
-  if(S.time>=a.nextFormationAt){a.nextFormationAt=S.time+rand(29,38);aaaSpawnPriorityFormation();}
-  if(S.time>=a.nextCapitalAt){a.nextCapitalAt=S.time+rand(70,92);aaaSpawnCapital();}
+  if(S.time>=a.nextFormationAt){a.nextFormationAt=S.time+rand(34,44);aaaSpawnPriorityFormation();}
+  if(S.time>=a.nextCapitalAt){a.nextCapitalAt=S.time+rand(80,102);aaaSpawnCapital();}
   if(S.time>=a.nextPriorityAlertAt){
     a.nextPriorityAlertAt=S.time+rand(24,34);
     const t=aaaPriorityTarget();

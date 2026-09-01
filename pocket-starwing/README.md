@@ -2,30 +2,37 @@
 
 A self-contained original pixel-art browser rail shooter.
 
-## Play
-Open `index.html` directly or serve this folder with any static HTTP server. No build step or runtime dependencies are required.
+## Primary movement
+Touch and mouse movement is direct manipulation: **press on the ship, hold it, and drag it around the playfield**. The ship follows the held pointer with light smoothing. This is the primary control model on phones/tablets and also works with a mouse. WASD / arrow keys remain as a fallback.
 
-## Controls
-- Move: WASD or arrow keys
-- Fire: Space (hold for autofire)
-- Dodge burst: Shift or C
-- Bomb: X
+## Actions
+- Hold FIRE / Space: autofire
+- Dodge: button, Shift or C
+- Bomb: button or X
 - Pause: P
-- Touch controls are built into the page, including hold-to-fire and dodge.
 
-## Gameplay systems
-- Five-sector branching campaign with five biome hazard profiles
-- Environmental collision with knockback and short invulnerability frames
-- Procedural tunnel walls with readable safe gaps
-- Breakable crystals/asteroids that can drop power-ups
-- Biome hazards: wind lanes, asteroid rushes, moving ruin gates, telegraphed lightning, gravity wells
-- Thread-the-needle gate bonuses
-- Bullet grazing: near misses award score and recharge dodge energy
-- Energy-powered dodge with directional burst and invulnerability window
-- Enemy formations with scouts, zig fighters, divers, turrets and tanks
-- Multi-phase bosses with rage behaviour at low health
-- Four weapon tiers, shields, repair pickups, bombs and score pickups
-- Combo multiplier, particles, hit-stop, screen shake, audio feedback and collision knockback
+## Weapon families
+Weapon drops now switch or upgrade distinct weapon families. Collecting the same family upgrades it to a maximum of three stars.
+- Pulse Cannon — fast, accurate general-purpose fire
+- Star Scatter — broad spread for swarms and tight movement
+- Prism Beam — rapid piercing shots for lines of enemies
+- Firefly Seekers — homing projectiles for agile targets
+- Nova Lance — slow, high-damage armour breaker with splash
 
-## Design goal
-Fast, readable arcade action: the player should be able to understand why they were hit, recover from mistakes, and take deliberate risks for higher scores instead of surviving random obstacle spam.
+More weapon families unlock as sectors progress.
+
+## Enemy roster
+The director can now mix scouts, zig fighters, divers, turrets, tanks, mines, splitters and carriers. Splitters spawn smaller enemies when destroyed; carriers deploy fighters and drop weapons; mines change speed as the player approaches.
+
+## Level progression
+Each biome has recurring set pieces rather than only random hazards:
+- Cloudberry Run: high/low tunnel routes plus wind lanes
+- Ember Canyon: tunnel runs mixed with breakable asteroid fields
+- Moonlit Ruins: tunnels followed by moving gate structures
+- Thunder Reach: route changes plus telegraphed lightning sequences
+- Candy Nebula: tunnel timing disrupted by gravity wells
+
+The encounter director mixes formations, terrain, hazards and set pieces, then escalates into the sector boss. Route choices change the mechanical mix, not just the colour palette.
+
+## Existing systems
+Environmental collision, knockback, readable safe gaps, breakable terrain, graze scoring, dodge energy, combo multipliers, bombs, shields, particles, hit-stop, screen shake and boss rage phases remain part of the core loop.

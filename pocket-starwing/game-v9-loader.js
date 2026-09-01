@@ -32,6 +32,10 @@ function applyTargetingBalance(source){
   }));
   source=source.replace(/S\.focusTimer=7\b/g,'S.focusTimer=8');
   source=source.replace(/for 7 seconds/g,'for 8 seconds');
+  const oldFocus='const focusBonus=target===S.focusTarget&&S.focusTimer>0?1.25:1;';
+  const newFocus='const focusBonus=target===S.focusTarget&&S.focusTimer>0?1.65:1;';
+  if(!source.includes(oldFocus))throw new Error('Focus-fire damage hook not found');
+  source=source.replace(oldFocus,newFocus);
   if(hpValues<5)throw new Error(`Targeting balance patch incomplete (${hpValues} HP values)`);
   return source;
 }

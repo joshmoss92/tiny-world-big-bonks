@@ -28,6 +28,7 @@ jobs:
           node --check pocket-starwing/v12-aim-controls.js
           node --check pocket-starwing/v13-engagement.js
           node --check pocket-starwing/v14-ui-fairness.js
+          node --check pocket-starwing/v15-final-controls.js
           node --check pocket-starwing/smoke-test.cjs
           node --check pocket-starwing/smoke-v105.cjs
           node --check pocket-starwing/smoke-v106.cjs
@@ -36,6 +37,7 @@ jobs:
           node --check pocket-starwing/smoke-v111.cjs
           node --check pocket-starwing/smoke-v12.cjs
           node --check pocket-starwing/smoke-v14.cjs
+          node --check pocket-starwing/smoke-v15.cjs
 
   stress:
     needs: syntax
@@ -81,3 +83,7 @@ jobs:
         env:
           STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-v14.cjs
+      - name: Simulate V15 final controls seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
+        run: node pocket-starwing/smoke-v15.cjs

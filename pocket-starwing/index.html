@@ -11,94 +11,26 @@
 <body>
   <main class="app-shell">
     <header class="masthead">
-      <div class="brand">
-        <span class="brand-glyph">✦</span>
-        <div>
-          <h1>Starward Run</h1>
-          <p>HIGH-SKILL ONE-FINGER SPACE ROGUELITE</p>
-        </div>
-      </div>
+      <div class="brand"><span class="brand-glyph">✦</span><div><h1>Starward Run</h1><p>HIGH-SKILL ONE-FINGER SPACE ROGUELITE</p></div></div>
       <div class="header-actions"><button id="soundBtn" class="tiny-button" type="button">SOUND ON</button></div>
-      <div class="run-hud" aria-live="polite">
-        <div><span>TIME</span><strong id="hudTime">0:00</strong></div>
-        <div><span>SECTOR</span><strong id="hudSector">1</strong></div>
-        <div><span>HULL</span><strong id="hudHull">34/34</strong></div>
-        <div><span>SHIELD</span><strong id="hudShield">14/14</strong></div>
-      </div>
+      <div class="run-hud" aria-live="polite"><div><span>TIME</span><strong id="hudTime">0:00</strong></div><div><span>SECTOR</span><strong id="hudSector">1</strong></div><div><span>HULL</span><strong id="hudHull">34/34</strong></div><div><span>SHIELD</span><strong id="hudShield">14/14</strong></div></div>
     </header>
 
     <section class="game-card">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run. Drag to pilot vertically while aiming every weapon. Flick for a Phase Dash. Graze projectiles and hold clean locks to build combat mastery. Combat now runs in assault and recovery cycles. Break each assault quota early for rewards. High-skill play raises a visible Danger Rank that increases enemy tactics and reward multipliers. Counter-marked enemies are about to fire: destroy them during the telegraph for bonus rewards. Shoot Power Fork and Flight Protocol cores to shape the run. Live events use their ACCEPT button. Fire the Star Laser with the dedicated button below the playfield."></canvas>
-
-      <div id="overlay" class="overlay">
-        <div class="choice-panel">
-          <div id="eyebrow" class="eyebrow">PILOT + GUNNER ROGUELITE</div>
-          <h2 id="overlayTitle">Push the danger. Break the assault.</h2>
-          <p id="overlayText">Build a ship, then earn your difficulty. Drag to pilot and aim, flick through danger with Phase Dash, graze hostile fire, and release charged locks for burst damage. Combat arrives in distinct assaults with tactical modifiers and clear break targets. Strong play raises your visible Danger Rank: enemies become faster and smarter, but rewards scale with the risk. Kill COUNTER-marked attackers before they fire to turn pressure into momentum.</p>
-          <div id="choiceGrid" class="choice-grid hidden"></div>
-          <div id="metaSummary" class="meta-summary"></div>
-          <div class="menu-actions"><button id="startBtn" class="primary-button">Configure Run</button><button id="skinBtn" class="secondary-button" type="button">Ship Skin</button></div>
-        </div>
-      </div>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. Drag to pilot vertically while aiming every weapon. Flick for a Phase Dash. Enemy collisions cause significant impact damage, so avoid ships as well as projectiles. Combat runs in assault and recovery cycles. Five-second live events tactically pause the battle while their choice timer continues. Normal bosses complete the current sector: after a boss dies, a Sector Clear sequence, salvage choice, and next-sector transition play before combat resumes. Counter-marked enemies are about to fire. Fire the Star Laser with the dedicated button below the playfield."></canvas>
+      <div id="overlay" class="overlay"><div class="choice-panel"><div id="eyebrow" class="eyebrow">PILOT + GUNNER ROGUELITE</div><h2 id="overlayTitle">Survive the assault. Clear the sector.</h2><p id="overlayText">Drag to pilot and aim, flick through danger with Phase Dash, and avoid both hostile fire and enemy hulls—collisions now hit hard. Five-second tactical events pause combat so you can read the risk and reward without losing track of the battle. Each sector ends with a normal boss; destroy it to trigger SECTOR CLEAR, claim salvage, then launch into a clearly signalled next-sector transition.</p><div id="choiceGrid" class="choice-grid hidden"></div><div id="metaSummary" class="meta-summary"></div><div class="menu-actions"><button id="startBtn" class="primary-button">Configure Run</button><button id="skinBtn" class="secondary-button" type="button">Ship Skin</button></div></div></div>
     </section>
 
     <section class="command-deck" aria-label="Run controls and status">
-      <div class="command-module laser-module">
-        <div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div>
-        <div class="meter laser-meter"><i id="laserFill"></i></div>
-        <button id="laserButton" class="laser-trigger" type="button">FIRE STAR LASER</button>
-        <small>Dedicated super weapon with a full cinematic discharge beat.</small>
-      </div>
-
-      <div class="command-module">
-        <div class="module-top"><span>DANGER</span><strong id="threatStatus">R1 · RECOVERY</strong></div>
-        <div class="meter threat-meter"><i id="threatFill"></i></div>
-        <small>Playing well raises Danger Rank. Higher rank means tougher patterns and better rewards.</small>
-      </div>
-
-      <div class="command-module">
-        <div class="module-top"><span>BUILD PROGRESS</span><strong id="upgradeStatus">0 / 84</strong></div>
-        <div class="meter upgrade-meter"><i id="upgradeFill"></i></div>
-        <small>Power Forks and Flight Protocols create non-pausing build decisions during combat.</small>
-      </div>
+      <div class="command-module laser-module"><div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div><div class="meter laser-meter"><i id="laserFill"></i></div><button id="laserButton" class="laser-trigger" type="button">FIRE STAR LASER</button><small>Dedicated super weapon with a full cinematic discharge beat.</small></div>
+      <div class="command-module"><div class="module-top"><span>DANGER</span><strong id="threatStatus">R1 · RECOVERY</strong></div><div class="meter threat-meter"><i id="threatFill"></i></div><small>Playing well raises Danger Rank. Higher rank means tougher patterns and better rewards.</small></div>
+      <div class="command-module"><div class="module-top"><span>BUILD PROGRESS</span><strong id="upgradeStatus">0 / 84</strong></div><div class="meter upgrade-meter"><i id="upgradeFill"></i></div><small>Boss salvage, Power Forks and Flight Protocols shape the run.</small></div>
     </section>
 
-    <section class="build-strip">
-      <div class="build-heading">
-        <span>ACTIVE BUILD</span>
-        <small>ACE = mobility · GUNNER = precision · WARDEN = interception defense.</small>
-      </div>
-      <div id="buildChips" class="build-chips"></div>
-    </section>
+    <section class="build-strip"><div class="build-heading"><span>ACTIVE BUILD</span><small>ACE = mobility · GUNNER = precision · WARDEN = interception defense.</small></div><div id="buildChips" class="build-chips"></div></section>
 
-    <footer>
-      <span>Drag = pilot + aim.</span>
-      <span>Flick = Phase Dash.</span>
-      <span>COUNTER = kill before they fire.</span>
-      <span>Break assault quota = early recovery.</span>
-      <span>High skill = higher Danger + rewards.</span>
-    </footer>
+    <footer><span>Drag = pilot + aim.</span><span>Flick = Phase Dash.</span><span>Avoid enemy hulls.</span><span>Events = tactical pause.</span><span>Boss down = sector clear.</span></footer>
   </main>
-  <script src="v10-transform.js"></script>
-  <script src="v10-polish2.js"></script>
-  <script src="v10-balance.js"></script>
-  <script src="v10-final.js"></script>
-  <script src="v10-polish3.js"></script>
-  <script src="v10-polish4.js"></script>
-  <script src="v10-polish5.js"></script>
-  <script src="v10-polish6.js"></script>
-  <script src="v10-polish7.js"></script>
-  <script src="v10-polish8.js"></script>
-  <script src="v10-polish9.js"></script>
-  <script src="v12-aim-controls.js"></script>
-  <script src="v13-engagement.js"></script>
-  <script src="v14-ui-fairness.js"></script>
-  <script src="v15-final-controls.js"></script>
-  <script src="v16-power-state.js"></script>
-  <script src="v17-flow-choice.js"></script>
-  <script src="v18-mechanics.js"></script>
-  <script src="v19-cinematic.js"></script>
-  <script src="v20-mechanics-refresh.js"></script>
-  <script src="game-v9-loader.js"></script>
+  <script src="v10-transform.js"></script><script src="v10-polish2.js"></script><script src="v10-balance.js"></script><script src="v10-final.js"></script><script src="v10-polish3.js"></script><script src="v10-polish4.js"></script><script src="v10-polish5.js"></script><script src="v10-polish6.js"></script><script src="v10-polish7.js"></script><script src="v10-polish8.js"></script><script src="v10-polish9.js"></script><script src="v12-aim-controls.js"></script><script src="v13-engagement.js"></script><script src="v14-ui-fairness.js"></script><script src="v15-final-controls.js"></script><script src="v16-power-state.js"></script><script src="v17-flow-choice.js"></script><script src="v18-mechanics.js"></script><script src="v19-cinematic.js"></script><script src="v20-mechanics-refresh.js"></script><script src="v21-sector-flow.js"></script><script src="game-v9-loader.js"></script>
 </body>
 </html>

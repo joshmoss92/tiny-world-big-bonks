@@ -34,3 +34,29 @@
 @media(max-width:680px){.tactical-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:390px){.tactical-results{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.results-panel .tactical-results{animation:none}}
+
+/* V12 aim-driven controls */
+.game-card,canvas{touch-action:none}
+canvas{cursor:crosshair}
+.laser-module{position:relative}
+.laser-trigger{
+  width:100%;
+  margin-top:8px;
+  border:1px solid #82f6ff;
+  border-radius:9px;
+  padding:8px 10px;
+  background:linear-gradient(180deg,#12344a,#0a2134);
+  color:#dfffff;
+  font-weight:950;
+  font-size:9px;
+  letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:inset 0 1px #ffffff18,0 0 18px #72eff71a;
+}
+.laser-trigger:hover,.laser-trigger:focus-visible{outline:0;border-color:#fff;color:#fff;box-shadow:inset 0 1px #ffffff2a,0 0 24px #72eff738}
+.laser-trigger:active{transform:translateY(1px);background:#17425a}
+@media(max-width:780px){
+  .laser-trigger{padding:10px;font-size:10px}
+  .game-card{border-radius:14px}
+}
+@media(prefers-reduced-motion:reduce){.laser-trigger:active{transform:none}}

@@ -1,0 +1,36 @@
+.tactical-results{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  margin-top:10px;
+  padding:10px;
+  border:1px solid #2b7085;
+  border-radius:12px;
+  background:linear-gradient(180deg,#081d2b,#071422);
+  box-shadow:inset 0 1px #8ff7ff12,0 0 28px #55dff00d;
+  text-align:left;
+}
+.tactical-results>strong{
+  grid-column:1/-1;
+  color:#8ff7ff;
+  font-size:9px;
+  letter-spacing:1.5px;
+}
+.tactical-results>span{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+  padding:7px;
+  border:1px solid #25445d;
+  border-radius:9px;
+  background:#06111e;
+  color:#718cab;
+  font-size:8px;
+  letter-spacing:.35px;
+}
+.tactical-results b{color:#f5fbff;font-size:12px;letter-spacing:0}
+.results-panel .tactical-results{animation:resultReveal .34s .28s ease both}
+@media(max-width:680px){.tactical-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.tactical-results{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.results-panel .tactical-results{animation:none}}

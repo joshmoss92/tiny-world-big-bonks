@@ -171,7 +171,7 @@ function v18AppendResults(){if(!S||typeof overlayText==='undefined')return;const
   overlayText.innerHTML+='<div class="tactical-results"><strong>PILOTING MASTERY</strong><span>Phase dashes <b>'+m.dashes+'</b></span><span>Perfect evades <b>'+m.perfectEvades+'</b></span><span>Projectile grazes <b>'+m.grazes+'</b></span><span>Lock Bursts <b>'+m.precisionBursts+'</b></span><span>Flight protocols chosen <b>'+m.protocolChoices+'/'+m.protocolForks+'</b></span></div>';
 }
 
-if(typeof window!=='undefined'&&window.__STARWARD__){window.__STARWARD__.v18State=()=>S?.v18||null;window.__STARWARD__.v18SpawnProtocolFork=v18SpawnProtocolFork;window.__STARWARD__.v18Dash=v18TriggerDash;window.__STARWARD__.v12SetAim=v12SetAim;window.__STARWARD__.v12ReleaseAim=v12ReleaseAim;}
+if(typeof window!=='undefined'&&window.__STARWARD__){window.__STARWARD__.v18State=()=>S?.v18||null;window.__STARWARD__.v18SpawnProtocolFork=v18SpawnProtocolFork;window.__STARWARD__.v18Dash=v18TriggerDash;window.__STARWARD__.v12CollectPowerup=v12ApplyPower;window.__STARWARD__.v12SetAim=v12SetAim;window.__STARWARD__.v12ReleaseAim=v12ReleaseAim;}
 // ---- end V18 expressive-control layer ----
 `;
 

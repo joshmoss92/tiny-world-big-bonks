@@ -1,36 +1,18 @@
-# Pocket Starwing
+# Starward Run
 
-A self-contained original pixel-art browser rail shooter.
+An original browser roguelite survival autoscroller.
 
-## Core feel
-- Native two-axis thumb steering: vertical travel is dominant, horizontal travel is deliberately narrower.
-- Continuous auto-fire; the only action button is dodge.
-- Smooth spring-follow movement with a visible thumb puck.
-- Environmental collision, knockback, readable gaps, breakable terrain and grazing remain core skills.
+## Core loop
+The ship flies, aims, shoots and dodges automatically. The player does not steer it. The player survives by choosing upgrades, weapon evolutions and event decisions that shape the autopilot's capabilities.
 
-## Weapons
-Weapon pickups change projectile speed, cadence and firing pattern. Repeating the same pickup upgrades it to three stars.
-- Pulse — balanced straight fire
-- Rapid — very fast, high-cadence streams
-- Scatter — wide multi-shot fans
-- Wave — oscillating lanes
-- Seek — slower homing projectiles
-- Lance — slow, heavy piercing shots with splash
+- Endless survival run with escalating threat.
+- Automatic combat and evasive flight.
+- Level-up upgrade drafts.
+- Random events with explicit trade-offs and occasional uncertain outcomes.
+- Multiple weapon systems with different targeting and damage profiles.
+- Ship stats for hull, shields, evasive AI, maneuver thrust, repair, rate of fire, damage, salvage collection and luck.
+- Elite waves and periodic boss encounters.
+- Biomes change as survival time increases.
+- High-survival record is stored locally in the browser.
 
-## Fun-pass systems
-- Skillful kills and grazes charge a short automatic Overdrive state with faster firing.
-- Encounter pacing now alternates pressure spikes with brief breathing windows.
-- New sniper enemies telegraph powerful shots before firing.
-- New orbiter enemies move in looping vertical patterns.
-- Formation/tunnel play can trigger bonus weapon drops.
-- Later sectors unlock broader enemy and weapon pools.
-
-## Level progression
-Each biome has recurring mechanical set-pieces:
-- Cloudberry — wind lanes and high/low tunnels
-- Ember — asteroid fields and breakable routes
-- Ruins — moving gate structures
-- Storm — telegraphed lightning sequences
-- Nebula — gravity-well timing disruptions
-
-Route choices alter the mechanical mix and each sector escalates into a boss fight.
+There are no direct flight or firing controls during a run. Decisions are the game.

@@ -3,44 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1022" />
-  <title>Pocket Starwing</title>
+  <meta name="theme-color" content="#08111f" />
+  <title>Starward Run</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
-      <h1>Pocket Starwing</h1>
+      <div class="brand"><span class="brand-mark">✦</span><h1>Starward Run</h1></div>
       <div class="hud" aria-live="polite">
-        <span aria-label="Score">★ <b id="score">0</b></span>
-        <span aria-label="Hull"><b id="hull">♥♥♥♥♥♥</b></span>
-        <span aria-label="Sector">◆ <b id="level">1</b></span>
-        <span class="weapon-pill" aria-label="Weapon"><b id="weapon">• Pulse ★</b></span>
+        <span>◷ <b id="time">0:00</b></span>
+        <span>♥ <b id="hull">6/6</b></span>
+        <span>◈ <b id="shield">0/0</b></span>
+        <span>◆ <b id="level">1</b></span>
+        <span>✧ <b id="salvage">0</b></span>
       </div>
     </header>
 
-    <section class="play-stage">
-      <div id="flightPad" class="flight-pad" role="application" aria-label="Flight control pad. Drag in any direction to steer.">
-        <span class="pad-axis pad-up">▲</span>
-        <span class="pad-axis pad-left">◀</span>
-        <span id="padPuck" class="pad-puck" aria-hidden="true"></span>
-        <span class="pad-axis pad-right">▶</span>
-        <span class="pad-axis pad-down">▼</span>
-      </div>
-
-      <section class="game-wrap">
-        <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game"></canvas>
-        <div id="overlay" class="overlay">
-          <div class="panel">
-            <h2 id="overlayTitle">Pocket Starwing</h2>
-            <p id="overlayText" class="overlay-copy"></p>
-            <div id="routeChoice" class="route-choice hidden"></div>
-            <button id="startBtn" class="play-button" aria-label="Start mission">▶</button>
-          </div>
+    <section class="game-wrap">
+      <canvas id="game" width="960" height="540" aria-label="Starward Run automatic survival simulation"></canvas>
+      <div id="overlay" class="overlay">
+        <div class="panel">
+          <div id="eyebrow" class="eyebrow">AUTOPILOT ROGUELITE</div>
+          <h2 id="overlayTitle">Starward Run</h2>
+          <p id="overlayText">The ship flies and fights on its own. Your decisions determine how long it survives.</p>
+          <div id="choiceGrid" class="choice-grid hidden"></div>
+          <button id="startBtn" class="play-button">Begin Run</button>
         </div>
-      </section>
+      </div>
+    </section>
+
+    <section class="systems" aria-label="Ship systems">
+      <div><span>DMG</span><b id="statDamage">100%</b></div>
+      <div><span>RATE</span><b id="statRate">100%</b></div>
+      <div><span>EVADE</span><b id="statDodge">0</b></div>
+      <div><span>THRUST</span><b id="statThrust">100%</b></div>
+      <div><span>REPAIR</span><b id="statRepair">0</b></div>
+      <div><span>LUCK</span><b id="statLuck">0%</b></div>
+    </section>
+
+    <section class="build-panel">
+      <div class="build-heading"><span>BUILD</span><b id="xpText">0 / 8 XP</b></div>
+      <div class="xp"><i id="xpBar"></i></div>
+      <div id="buildChips" class="build-chips"><span class="empty-chip">No upgrades yet</span></div>
     </section>
   </main>
-  <script src="shooter.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>

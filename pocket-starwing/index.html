@@ -18,20 +18,21 @@
         <span>Score <b id="score">0</b></span>
         <span>Hull <b id="hull">♥♥♥♥♥♥</b></span>
         <span>Sector <b id="level">1</b></span>
-        <span>Weapon <b id="weapon">Pulse I</b></span>
+        <span>Weapon <b id="weapon">Pulse Cannon ★</b></span>
         <span>Energy <b id="energy">100%</b></span>
       </div>
     </header>
 
     <section class="game-wrap">
-      <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game canvas"></canvas>
+      <canvas id="game" width="960" height="540" tabindex="0" aria-label="Pocket Starwing game. Hold the ship and drag it to move."></canvas>
       <div id="overlay" class="overlay">
         <div class="panel">
           <h2 id="overlayTitle">Pocket Starwing</h2>
-          <p id="overlayText">Blast raiders, dodge plasma, thread terrain gaps, destroy breakable hazards and defeat the guardian at the end of each sector.</p>
+          <p id="overlayText">Hold the ship and drag it exactly where you want to fly. Blast enemies, thread terrain gaps and discover new weapons as the sectors get stranger.</p>
           <div class="tips">
-            <span>Near-miss bullets to recharge dodge energy</span>
-            <span>Fly cleanly through gates for bonus score</span>
+            <span>Hold + drag the ship to move</span>
+            <span>Near-miss bullets to recharge dodge</span>
+            <span>Weapon drops can switch or upgrade your gun</span>
           </div>
           <div id="routeChoice" class="route-choice hidden"></div>
           <button id="startBtn">Start Mission</button>
@@ -40,28 +41,26 @@
     </section>
 
     <section class="controls">
-      <div>
-        <h3>Keyboard</h3>
-        <p>Move: WASD / arrows · Fire: Space · Dodge: Shift/C · Bomb: X · Pause: P</p>
+      <div class="drag-help">
+        <h3>Movement</h3>
+        <p><strong>Touch / mouse:</strong> press directly on the ship, hold it, then drag. Keyboard movement remains available with WASD / arrows.</p>
       </div>
-      <div class="touch-pad" aria-label="Touch controls">
-        <button data-move="up" aria-label="Move up">▲</button>
-        <button data-move="left" aria-label="Move left">◀</button>
-        <button id="fireBtn" class="accent">FIRE</button>
-        <button data-move="right" aria-label="Move right">▶</button>
+      <div class="action-pad" aria-label="Action controls">
+        <button id="fireBtn" class="accent">HOLD FIRE</button>
         <button id="dodgeBtn" class="dodge">DODGE</button>
-        <button data-move="down" aria-label="Move down">▼</button>
         <button id="bombBtn">BOMB</button>
       </div>
     </section>
 
     <section class="legend">
-      <span>💚 Repair</span>
-      <span>⚡ Weapon up</span>
-      <span>🛡 Shield</span>
-      <span>💣 Bomb</span>
-      <span>⭐ Score burst</span>
-      <span>✦ Graze = energy</span>
+      <span>Pulse = accurate</span>
+      <span>Scatter = wide</span>
+      <span>Beam = piercing</span>
+      <span>Seekers = homing</span>
+      <span>Nova = heavy</span>
+      <span>Repair</span>
+      <span>Shield</span>
+      <span>Bomb</span>
     </section>
   </main>
   <script src="game.js"></script>

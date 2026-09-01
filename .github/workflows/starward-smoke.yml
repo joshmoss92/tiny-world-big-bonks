@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke:
+  syntax:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,5 +17,20 @@ jobs:
           node-version: '22'
       - name: Loader syntax check
         run: node --check pocket-starwing/game-v9-loader.js
-      - name: Reconstruct and simulate V9 runtime
+
+  stress:
+    needs: syntax
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [123456789, 987654321, 42424242]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Simulate V10.4 combat seed ${{ matrix.seed }}
+        env:
+          STARWARD_SEED: ${{ matrix.seed }}
         run: node pocket-starwing/smoke-test.cjs

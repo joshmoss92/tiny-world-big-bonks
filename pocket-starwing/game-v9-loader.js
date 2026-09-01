@@ -41,12 +41,14 @@ function applyTargetingBalance(source){
 }
 async function boot(){
   try{
+    if(!globalThis.StarwardV10Transform?.apply)throw new Error('V10 tactical transform failed to load.');
     const [base,...patches]=await Promise.all([BASE,...PATCHES].map(async path=>{const r=await fetch(path,{cache:'no-store'});if(!r.ok)throw new Error(`Failed ${path} (${r.status})`);return r.text();}));
     const ops=JSON.parse(await gunzipBase64(patches.map(x=>x.trim()).join(''))), lines=splitLines(base), out=[];
     for(const op of ops){if(op[0]==='=')out.push(lines.slice(op[1],op[2]).join(''));else out.push(op[1]);}
-    (0,eval)(applyTargetingBalance(out.join('')));
+    const source=globalThis.StarwardV10Transform.apply(applyTargetingBalance(out.join('')));
+    (0,eval)(source);
   }catch(error){
-    console.error('Starward Run V9 boot failure',error);
+    console.error('Starward Run V10 boot failure',error);
     const title=document.getElementById('overlayTitle'),text=document.getElementById('overlayText'),overlay=document.getElementById('overlay');
     if(title)title.textContent='Unable to start Starward Run';
     if(text)text.textContent='The game runtime could not be loaded. Refresh the page to try again.';

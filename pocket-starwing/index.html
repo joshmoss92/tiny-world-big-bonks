@@ -27,7 +27,7 @@
     </header>
 
     <section class="game-card">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies and fights automatically. Tap the ship when the Star Laser is ready. Tap enemies or boss systems to focus fire. Timed challenge prompts can be accepted by tapping empty space."></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies and fights automatically. Tap the ship when the Star Laser is ready. Tap priority enemies or boss systems to focus fire. Timed challenge prompts can be accepted by tapping empty space."></canvas>
 
       <div id="overlay" class="overlay">
         <div class="choice-panel">
@@ -51,7 +51,7 @@
       <div class="command-module">
         <div class="module-top"><span>THREAT</span><strong id="threatStatus">LOW</strong></div>
         <div class="meter threat-meter"><i id="threatFill"></i></div>
-        <small>Enemy density rises as each sector continues.</small>
+        <small>Priority enemies can amplify the whole formation.</small>
       </div>
 
       <div class="command-module">
@@ -72,10 +72,11 @@
     <footer>
       <span>Idle by default.</span>
       <span>Tap ship = Star Laser.</span>
-      <span>Tap enemy/system = focus fire for 7s.</span>
+      <span>Tap priority enemy/system = focus fire for 8s.</span>
       <span>Timed challenge = tap empty space to accept.</span>
     </footer>
   </main>
+  <script src="v10-transform.js"></script>
   <script src="game-v9-loader.js"></script>
 </body>
 </html>

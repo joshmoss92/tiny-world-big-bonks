@@ -15,7 +15,7 @@
         <span class="brand-glyph">✦</span>
         <div>
           <h1>Starward Run</h1>
-          <p>AIM-DRIVEN SURVIVAL ROGUELITE</p>
+          <p>ONE-FINGER SPACE COMBAT ROGUELITE</p>
         </div>
       </div>
       <div class="header-actions"><button id="soundBtn" class="tiny-button" type="button">SOUND ON</button></div>
@@ -28,13 +28,13 @@
     </header>
 
     <section class="game-card">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies straight ahead and fires automatically. Hold and drag on the playfield to aim the firing direction. Release to fire straight ahead. Shoot enemy projectiles and glowing power cores. Power Forks present offense, defense and utility cores: shoot one to choose it. Live events use their ACCEPT button. Fire the Star Laser with the dedicated button below the playfield."></canvas>
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. Drag on the battlefield to pilot the ship vertically while aiming every weapon. Flick up or down for a Phase Dash. Graze enemy projectiles to build Gunnery Flow. Hold a steady lock then release for a Lock Burst. Shoot Power Fork and Flight Protocol cores to shape the run. Live events use their ACCEPT button. Fire the Star Laser with the dedicated button below the playfield."></canvas>
 
       <div id="overlay" class="overlay">
         <div class="choice-panel">
-          <div id="eyebrow" class="eyebrow">AIM-DRIVEN ROGUELITE</div>
-          <h2 id="overlayTitle">Fly straight. Aim everything.</h2>
-          <p id="overlayText">Choose your starting build, then the ship holds a straight flight line and fires automatically. Hold anywhere on the battle to aim every weapon. Shoot dangerous enemies, intercept incoming fire, choose between power cores in real time, and take frequent risk/reward contracts.</p>
+          <div id="eyebrow" class="eyebrow">PILOT + GUNNER ROGUELITE</div>
+          <h2 id="overlayTitle">Fly it. Aim it. Break the formation.</h2>
+          <p id="overlayText">Choose a starting build, then control the fight with one finger. Drag vertically to pilot while your arsenal follows your aim. Flick through danger with a Phase Dash, skim hostile fire to build Flow, hold a clean lock and release for a burst of damage, and shoot real-time power or protocol choices without stopping the battle.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
           <div id="metaSummary" class="meta-summary"></div>
           <div class="menu-actions"><button id="startBtn" class="primary-button">Configure Run</button><button id="skinBtn" class="secondary-button" type="button">Ship Skin</button></div>
@@ -47,36 +47,36 @@
         <div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div>
         <div class="meter laser-meter"><i id="laserFill"></i></div>
         <button id="laserButton" class="laser-trigger" type="button">FIRE STAR LASER</button>
-        <small>Dedicated control so aiming never fires the laser by accident.</small>
+        <small>Dedicated super weapon. Aim and movement stay uninterrupted.</small>
       </div>
 
       <div class="command-module">
-        <div class="module-top"><span>FIRE CONTROL</span><strong id="threatStatus">LOW</strong></div>
+        <div class="module-top"><span>PILOTING</span><strong id="threatStatus">LOW</strong></div>
         <div class="meter threat-meter"><i id="threatFill"></i></div>
-        <small>Hold to aim. Accurate fire destroys threats, intercepts projectiles and builds Gunnery Flow.</small>
+        <small>Drag = steer + aim. Flick = Phase Dash. Close projectile grazes build Flow.</small>
       </div>
 
       <div class="command-module">
         <div class="module-top"><span>BUILD PROGRESS</span><strong id="upgradeStatus">0 / 84</strong></div>
         <div class="meter upgrade-meter"><i id="upgradeFill"></i></div>
-        <small>Build drafts and live contracts are joined by non-pausing Power Fork choices.</small>
+        <small>Power Forks and Flight Protocols create non-pausing build decisions during combat.</small>
       </div>
     </section>
 
     <section class="build-strip">
       <div class="build-heading">
         <span>ACTIVE BUILD</span>
-        <small>Power Forks offer OFFENSE, DEFENSE and UTILITY cores. Shoot one; the other two collapse.</small>
+        <small>ACE = mobility · GUNNER = precision · WARDEN = interception defense.</small>
       </div>
       <div id="buildChips" class="build-chips"></div>
     </section>
 
     <footer>
-      <span>Hold + drag = aim.</span>
-      <span>Release = fire forward.</span>
-      <span>Shoot projectiles = defend.</span>
-      <span>Power Fork = shoot one choice.</span>
-      <span>Live event = tap ACCEPT.</span>
+      <span>Drag = pilot + aim.</span>
+      <span>Flick = Phase Dash.</span>
+      <span>Graze = build Flow.</span>
+      <span>Steady lock + release = Lock Burst.</span>
+      <span>Shoot choices = shape the run.</span>
     </footer>
   </main>
   <script src="v10-transform.js"></script>
@@ -96,6 +96,7 @@
   <script src="v15-final-controls.js"></script>
   <script src="v16-power-state.js"></script>
   <script src="v17-flow-choice.js"></script>
+  <script src="v18-mechanics.js"></script>
   <script src="game-v9-loader.js"></script>
 </body>
 </html>

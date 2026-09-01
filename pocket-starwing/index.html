@@ -3,51 +3,76 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#07101e" />
+  <meta name="theme-color" content="#050914" />
   <title>Starward Run</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand"><span class="brand-mark">✦</span><div><h1>Starward Run</h1><small>IDLE SURVIVAL ROGUELITE</small></div></div>
-      <div class="hud" aria-live="polite">
-        <span>TIME <b id="time">0:00</b></span>
-        <span>HULL <b id="hull">24/24</b></span>
-        <span>SHIELD <b id="shield">8/8</b></span>
-        <span>LEVEL <b id="level">1</b></span>
-        <span>SALVAGE <b id="salvage">0</b></span>
+  <main class="app-shell">
+    <header class="masthead">
+      <div class="brand">
+        <span class="brand-glyph">✦</span>
+        <div>
+          <h1>Starward Run</h1>
+          <p>AUTOPILOT SURVIVAL ROGUELITE</p>
+        </div>
+      </div>
+      <div class="run-hud" aria-live="polite">
+        <div><span>TIME</span><strong id="hudTime">0:00</strong></div>
+        <div><span>SECTOR</span><strong id="hudSector">1</strong></div>
+        <div><span>HULL</span><strong id="hudHull">24/24</strong></div>
+        <div><span>SHIELD</span><strong id="hudShield">8/8</strong></div>
       </div>
     </header>
 
-    <section class="game-wrap">
-      <canvas id="game" width="960" height="540" aria-label="Starward Run idle survival roguelite. Kills charge the Star Laser, which can fire no more than once every 30 seconds. Timed challenge events can be accepted by tapping elsewhere on the screen."></canvas>
+    <section class="game-card">
+      <canvas id="game" width="960" height="540" aria-label="Starward Run. The ship flies and fights automatically. Tap the ship when the Star Laser is ready. Timed challenge prompts can be accepted by tapping the playfield."></canvas>
+
       <div id="overlay" class="overlay">
-        <div class="panel">
-          <div id="eyebrow" class="eyebrow">IDLE ROGUELITE</div>
-          <h2 id="overlayTitle">Starward Run</h2>
-          <p id="overlayText">Build the ship, then survive a much denser battlefield. Kills charge the Star Laser, but it can only fire once every 30 seconds. Live challenge events can be accepted before their five-second timer expires.</p>
+        <div class="choice-panel">
+          <div id="eyebrow" class="eyebrow">AUTOPILOT ROGUELITE</div>
+          <h2 id="overlayTitle">Build a ship. Then let it fly.</h2>
+          <p id="overlayText">Make five starting choices. During the run, the ship flies, aims and dodges itself. You decide the build, trigger the Star Laser, and choose whether to accept dangerous live challenges.</p>
           <div id="choiceGrid" class="choice-grid hidden"></div>
-          <button id="startBtn" class="play-button">Build a Ship</button>
+          <button id="startBtn" class="primary-button">Configure Run</button>
         </div>
       </div>
     </section>
 
-    <section class="systems" aria-label="Ship stats">
-      <div><span>DAMAGE</span><b id="statDamage">100%</b></div>
-      <div><span>FIRE RATE</span><b id="statRate">100%</b></div>
-      <div><span>DODGING</span><b id="statDodge">24%</b></div>
-      <div><span>SPEED</span><b id="statThrust">126%</b></div>
-      <div><span>REPAIR</span><b id="statRepair">1 / 50s</b></div>
-      <div><span>LUCK</span><b id="statLuck">0%</b></div>
+    <section class="command-deck" aria-label="Run controls and status">
+      <div class="command-module laser-module">
+        <div class="module-top"><span>STAR LASER</span><strong id="laserStatus">CHARGE 0%</strong></div>
+        <div class="meter laser-meter"><i id="laserFill"></i></div>
+        <small>Tap the ship when fully charged and online.</small>
+      </div>
+
+      <div class="command-module">
+        <div class="module-top"><span>THREAT</span><strong id="threatStatus">LOW</strong></div>
+        <div class="meter threat-meter"><i id="threatFill"></i></div>
+        <small>Enemy density rises as each sector continues.</small>
+      </div>
+
+      <div class="command-module">
+        <div class="module-top"><span>BUILD PROGRESS</span><strong id="upgradeStatus">0 / 84</strong></div>
+        <div class="meter upgrade-meter"><i id="upgradeFill"></i></div>
+        <small>Choices are intentionally spaced out.</small>
+      </div>
     </section>
 
-    <section class="build-panel">
-      <div class="build-heading"><span>UPGRADE METER</span><b id="xpText">0 / 68</b></div>
-      <div class="xp"><i id="xpBar"></i></div>
-      <div id="buildChips" class="build-chips"><span class="weapon-chip">• Pulse Cannon Lv.1</span></div>
+    <section class="build-strip">
+      <div class="build-heading">
+        <span>ACTIVE BUILD</span>
+        <small>Live challenges never pause the fight.</small>
+      </div>
+      <div id="buildChips" class="build-chips"></div>
     </section>
+
+    <footer>
+      <span>Idle by default.</span>
+      <span>Tap ship = Star Laser.</span>
+      <span>Timed challenge = tap playfield to accept.</span>
+    </footer>
   </main>
-  <script src="game-v6.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>

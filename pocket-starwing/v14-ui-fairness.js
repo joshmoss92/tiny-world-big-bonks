@@ -56,6 +56,7 @@ v12Ensure=function(){const v=__v14Fresh();if(v&&!v.v14Fairness){v.v14Fairness=tr
 if(typeof window!=='undefined'&&window.__STARWARD__){
   window.__STARWARD__.v14EventLines=()=>v12EventLines();
   window.__STARWARD__.v14EventBox=()=>v12EventBox();
+  window.__STARWARD__.v14FireTick=()=>updateWeapons(.016);
 }
 // ---- end V14 fairness layer ----
 `;

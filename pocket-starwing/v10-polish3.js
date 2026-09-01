@@ -123,7 +123,7 @@ function aaa3DrawTargetDossier(){
     ctx.fillStyle=capital?'#ffd36f':'#8ff7ff';ctx.font='bold 10px monospace';ctx.fillText(label,x+10,y+16);
     ctx.fillStyle='#aebdd3';ctx.font='8px monospace';ctx.fillText(sub,x+10,y+29);
     ctx.fillStyle='#1c2a40';ctx.fillRect(x+10,y+36,w-72,7);ctx.fillStyle=ratio<.28?'#ff7c91':capital?'#ffd36f':'#8ff7ff';ctx.fillRect(x+10,y+36,(w-72)*ratio,7);
-    ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='right';ctx.fillText(`${Math.ceil(ratio*100)}% · ${S.focusTimer.toFixed(1)}s`,x+w-8,y+43);ctx.textAlign='left';ctx.restore();
+    ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='right';ctx.fillText(Math.ceil(ratio*100)+'% · '+S.focusTimer.toFixed(1)+'s',x+w-8,y+43);ctx.textAlign='left';ctx.restore();
     aaa3DrawCornerReticle(t.x,t.y,t.size+13,capital?'#ffd36f':'#ffffff',.75+.2*Math.sin(S.time*8));
     if(S.weapons.beam>0){ctx.save();ctx.globalAlpha=.10+.05*Math.sin(S.time*10);ctx.strokeStyle='#8ff7ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(S.ship.x+24,S.ship.y);ctx.lineTo(t.x,t.y);ctx.stroke();ctx.restore();}
   }else{

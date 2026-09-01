@@ -29,6 +29,9 @@ jobs:
           node --check pocket-starwing/smoke-v106.cjs
           node --check pocket-starwing/smoke-v107.cjs
           node --check pocket-starwing/smoke-v110.cjs
+          node --check pocket-starwing/inspect-v110.cjs
+      - name: Inspect generated V10.10 results path
+        run: node pocket-starwing/inspect-v110.cjs
 
   stress:
     needs: syntax
